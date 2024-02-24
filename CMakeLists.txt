@@ -9,13 +9,20 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+  CACHE STRING "Vcpkg toolchain file")
+
 project ("img2mosaic")
 
 # Add source to this project's executable.
-add_executable (img2mosaic "img2mosaic.cpp" "img2mosaic.h")
+add_executable (img2mosaic "source/img2mosaic.cpp"  "source/argument.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET img2mosaic PROPERTY CXX_STANDARD 20)
 endif()
 
-# TODO: Add tests and install targets if needed.
+find_package(cxxopts CONFIG REQUIRED)
+target_link_libraries(img2mosaic PRIVATE cxxopts::cxxopts)
+
+find_package(CLI11 CONFIG REQUIRED)
+target_link_libraries(img2mosaic PRIVATE CLI11::CLI11)
