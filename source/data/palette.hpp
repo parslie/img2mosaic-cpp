@@ -8,3 +8,4 @@ typedef std::map<std::string, std::vector<std::string>> Palette;
 
 Palette loadPalette(const std::string profile);
 void savePalette(const std::string profile, const Palette &palette);
+void printPalette(const Palette &palette);

@@ -69,3 +69,27 @@ void savePalette(string profile, const Palette &palette)
 	ofstream file(palettePath);
 	file << data << endl;
 }
+
+constexpr auto TAB = "   ";
+
+void printPalette(const Palette &palette)
+{
+	cout << "{\n";
+	for (auto iter = palette.begin(); iter != palette.end(); iter++)
+	{
+		string key = (*iter).first;
+		vector<string> list = (*iter).second;
+
+		cout << TAB << "\"" << key << "\": [";
+		for (auto listIter = list.begin(); listIter != list.end(); listIter++)
+		{
+			string listValue = *listIter;
+
+			cout << "\"" << listValue << "\"";
+			if (listIter + 1 != list.end())
+				cout << ", ";
+		}
+		cout << TAB << "]\n,";
+	}
+	cout << "}" << endl;
+}
