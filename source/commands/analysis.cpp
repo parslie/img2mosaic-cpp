@@ -6,6 +6,8 @@
 #include <filesystem>
 #include <vector>
 
+#include <opencv2/opencv.hpp>
+
 using namespace std;
 namespace fs = filesystem;
 
@@ -48,8 +50,21 @@ void analysis::run(const Arguments &arguments)
 	cout << "Got " << paths.size() << " unanalyzed images." << endl;
 
 	// 3. Iterate over each path
-	//	  a. Get average color
-	//	  b. Add color to palette
+	for (fs::path path : paths)
+	{
+		cv::Mat image = cv::imread(path.string(), cv::IMREAD_COLOR);
+		cv::Mat resizedImage;
+		cv::Size size(512, 512);
+		cv::resize(image, resizedImage, size);
+		cv::imshow("Image", resizedImage);
+		cv::waitKey(0);
+		cv::destroyAllWindows();
+		exit(0);
+
+		// a. Get average color
+		// b. Add color to palette
+	}
+
 
 	// 4. Save palette
 	savePalette(arguments.profile, palette);

@@ -21,8 +21,11 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET img2mosaic PROPERTY CXX_STANDARD 20)
 endif()
 
-find_package(cxxopts CONFIG REQUIRED)
-target_link_libraries(img2mosaic PRIVATE cxxopts::cxxopts)
-
 find_package(CLI11 CONFIG REQUIRED)
 target_link_libraries(img2mosaic PRIVATE CLI11::CLI11)
+
+find_package(nlohmann_json CONFIG REQUIRED)
+target_link_libraries(img2mosaic PRIVATE nlohmann_json::nlohmann_json)
+
+find_package(OpenCV CONFIG REQUIRED)
+target_link_libraries(img2mosaic PRIVATE ${OpenCV_LIBS})
