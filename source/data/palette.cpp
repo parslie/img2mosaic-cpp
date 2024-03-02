@@ -93,3 +93,13 @@ void printPalette(const Palette &palette)
 	}
 	cout << "}" << endl;
 }
+
+bool paletteContains(const Palette &palette, const string targetPath)
+{
+	for (auto &[_, paths] : palette)
+		for (auto &path : paths)
+			if (path == targetPath)
+				return true;
+
+	return false;
+}
