@@ -1,4 +1,5 @@
 #include "palette.hpp"
+#include "../utils/color.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -112,4 +113,16 @@ bool paletteContains(const Palette &palette, const string targetPath)
 				return true;
 
 	return false;
+}
+
+void paletteAddImageSection(Palette &palette, const cv::Vec3b &color, const ImageSection &imageSection)
+{
+	string colorString = colorToString(color);
+
+	vector<ImageSection> imageSections;
+	if (palette.find(colorString) != palette.end())
+		imageSections = palette.at(colorString);
+
+	imageSections.push_back(imageSection);
+	palette[colorString] = imageSections;
 }

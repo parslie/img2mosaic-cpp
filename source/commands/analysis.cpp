@@ -59,11 +59,9 @@ void analysis::run(const Arguments &arguments)
 		{
 			cv::Vec3b averageColor = getAverageColor(imageSection.mat);
 			cout << "Average color: (" << (int)averageColor[2] << ", " << (int)averageColor[1] << ", " << (int)averageColor[0] << ")" << endl;
+			paletteAddImageSection(palette, averageColor, imageSection);
 		}
-
-		// b. Add color to palette
 	}
-
 
 	// 4. Save palette
 	savePalette(arguments.profile, palette);
