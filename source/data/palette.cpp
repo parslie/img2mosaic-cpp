@@ -40,14 +40,24 @@ Palette loadPalette(string profile)
 
 	for (auto iter = data.begin(); iter != data.end(); iter++)
 	{
-		string color = iter.key();
-		json imagesJson = iter.value();
-		vector<string> images;
+		string colorString = iter.key();
+		json imageSectionsJson = iter.value();
+		vector<ImageSection> imageSections;
 
-		for (auto imagesIter = imagesJson.begin(); imagesIter != imagesJson.end(); imagesIter++)
-			images.push_back(*imagesIter);
+		for (auto imageSectionsIter = imageSectionsJson.begin(); imageSectionsIter != imageSectionsJson.end(); imageSectionsIter++)
+		{
+			json imageSectionJson = *imageSectionsIter;
+			imageSections.push_back({
+				cv::Mat::zeros(0, 0, 0), // Pre-loading images here would waste memory
+				imageSectionJson["path"],
+				imageSectionJson["x"],
+				imageSectionJson["y"],
+				imageSectionJson["width"],
+				imageSectionJson["height"],
+			});
+		}
 
-		palette[color] = images;
+		palette[colorString] = imageSections;
 	}
 
 	return palette;
@@ -58,12 +68,12 @@ void savePalette(string profile, const Palette &palette)
 	fs::path palettePath = getPalettePath(profile);
 
 	json data = json::object();
-	for (auto &[color, images] : palette)
+	for (auto &[colorString, imageSections] : palette)
 	{
 		json imagesJson = json::array();
-		for (auto image : images)
-			imagesJson.push_back(image);
-		data[color] = imagesJson;
+		for (auto &imageSection : imageSections)
+			imagesJson.push_back(imageSection.toJson());
+		data[colorString] = imagesJson;
 	}
 
 	ofstream file(palettePath);
@@ -77,16 +87,16 @@ void printPalette(const Palette &palette)
 	cout << "{\n";
 	for (auto iter = palette.begin(); iter != palette.end(); iter++)
 	{
-		string key = (*iter).first;
-		vector<string> list = (*iter).second;
+		string colorString = (*iter).first;
+		vector<ImageSection> imageSections = (*iter).second;
 
-		cout << TAB << "\"" << key << "\": [";
-		for (auto listIter = list.begin(); listIter != list.end(); listIter++)
+		cout << TAB << "\"" << colorString << "\": [";
+		for (auto imageSectionsIter = imageSections.begin(); imageSectionsIter != imageSections.end(); imageSectionsIter++)
 		{
-			string listValue = *listIter;
+			ImageSection imageSection = *imageSectionsIter;
 
-			cout << "\"" << listValue << "\"";
-			if (listIter + 1 != list.end())
+			cout << "\"" << imageSection.path.string() << "\""; // TODO: print whole image section?
+			if (imageSectionsIter + 1 != imageSections.end())
 				cout << ", ";
 		}
 		cout << TAB << "]\n,";
@@ -96,9 +106,9 @@ void printPalette(const Palette &palette)
 
 bool paletteContains(const Palette &palette, const string targetPath)
 {
-	for (auto &[_, paths] : palette)
-		for (auto &path : paths)
-			if (path == targetPath)
+	for (auto &[_, imageSections] : palette)
+		for (auto &imageSection : imageSections)
+			if (imageSection.path == targetPath)
 				return true;
 
 	return false;

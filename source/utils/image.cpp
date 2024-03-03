@@ -4,6 +4,7 @@
 
 using namespace std;
 namespace fs = std::filesystem;
+using json = nlohmann::json;
 
 static vector<ImageSection> splitImageVertical(const fs::path &path, const cv::Mat &image, int sectionSize)
 {
@@ -134,4 +135,15 @@ cv::Vec3b getAverageColor(const cv::Mat &mat)
 	uchar averageGreen = (uchar)round(totalGreen / colorCount);
 	uchar averageRed = (uchar)round(totalRed / colorCount);
 	return cv::Vec3b(averageBlue, averageGreen, averageRed);
+}
+
+nlohmann::json ImageSection::toJson() const
+{
+	json data = json::object();
+	data["path"] = this->path.string();
+	data["x"] = this->x;
+	data["y"] = this->y;
+	data["width"] = this->width;
+	data["height"] = this->height;
+	return data;
 }
