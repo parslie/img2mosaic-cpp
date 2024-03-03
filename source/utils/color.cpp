@@ -7,7 +7,7 @@ using namespace std;
 string colorToString(const cv::Vec3b &color)
 {
 	stringstream sstream;
-	sstream << color[2] << "," << color[1] << "," << color[0];
+	sstream << (int)color[2] << "," << (int)color[1] << "," << (int)color[0];
 	return sstream.str();
 }
 
