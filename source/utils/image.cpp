@@ -101,15 +101,9 @@ vector<ImageSection> splitImage(const fs::path &path)
 	cv::Mat image = cv::imread(path.string(), cv::IMREAD_COLOR);
 
 	if (image.size[0] > image.size[1])
-	{
-		cout << "Vertical (" << image.size[1] << "x" << image.size[0] << ")" << endl;
 		return splitImageVertical(path, image, image.size[1]);
-	}
 	else
-	{
-		cout << "Horizontal (" << image.size[1] << "x" << image.size[0] << ")" << endl;
 		return splitImageHorizontal(path, image, image.size[0]);
-	}
 }
 
 cv::Vec3b getAverageColor(const cv::Mat &mat)

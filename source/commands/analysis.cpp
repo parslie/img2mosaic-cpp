@@ -51,6 +51,7 @@ void analysis::run(const Arguments &arguments)
 	cout << "Got " << paths.size() << " unanalyzed images." << endl;
 
 	// 3. Iterate over each path
+	int newImageSections = 0;
 	for (fs::path path : paths)
 	{
 		vector<ImageSection> imageSections = splitImage(path);
@@ -58,11 +59,13 @@ void analysis::run(const Arguments &arguments)
 		for (ImageSection imageSection : imageSections)
 		{
 			cv::Vec3b averageColor = getAverageColor(imageSection.mat);
-			cout << "Average color: (" << (int)averageColor[2] << ", " << (int)averageColor[1] << ", " << (int)averageColor[0] << ")" << endl;
 			paletteAddImageSection(palette, averageColor, imageSection);
+			newImageSections += 1;
 		}
 	}
+	cout << "Added " << newImageSections << " new image sections to the palette." << endl;
 
 	// 4. Save palette
 	savePalette(arguments.profile, palette);
+	cout << "Saved palette." << endl;
 }
