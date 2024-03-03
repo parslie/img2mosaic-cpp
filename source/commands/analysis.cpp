@@ -1,5 +1,6 @@
 #include "analysis.hpp"
 #include "../data/palette.hpp"
+#include "../utils/image.hpp"
 
 #include <array>
 #include <iostream>
@@ -52,16 +53,14 @@ void analysis::run(const Arguments &arguments)
 	// 3. Iterate over each path
 	for (fs::path path : paths)
 	{
-		cv::Mat image = cv::imread(path.string(), cv::IMREAD_COLOR);
-		cv::Mat resizedImage;
-		cv::Size size(512, 512);
-		cv::resize(image, resizedImage, size);
-		cv::imshow("Image", resizedImage);
-		cv::waitKey(0);
-		cv::destroyAllWindows();
-		exit(0);
+		vector<ImageSection> imageSections = splitImage(path);
 
-		// a. Get average color
+		for (ImageSection imageSection : imageSections)
+		{
+			cv::Vec3b averageColor = getAverageColor(imageSection.mat);
+			cout << "Average color: (" << (int)averageColor[2] << ", " << (int)averageColor[1] << ", " << (int)averageColor[0] << ")" << endl;
+		}
+
 		// b. Add color to palette
 	}
 
