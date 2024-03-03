@@ -52,18 +52,23 @@ void analysis::run(const Arguments &arguments)
 
 	// 3. Iterate over each path
 	int newImageSections = 0;
+	int pathsAnalyzed = 0;
 	for (fs::path path : paths)
 	{
 		vector<ImageSection> imageSections = splitImage(path);
 
 		for (ImageSection imageSection : imageSections)
 		{
-			cv::Vec3b averageColor = getAverageColor(imageSection.mat);
+			cv::Mat sectionMat = imreadImageSection(imageSection);
+			cv::Vec3b averageColor = getAverageColor(sectionMat);
 			paletteAddImageSection(palette, averageColor, imageSection);
 			newImageSections += 1;
 		}
+
+		pathsAnalyzed += 1;
+		cout << '\r' << pathsAnalyzed << "/" << paths.size() << " images analyzed.";
 	}
-	cout << "Added " << newImageSections << " new image sections to the palette." << endl;
+	cout << "\nAdded " << newImageSections << " new image sections to the palette." << endl;
 
 	// 4. Save palette
 	savePalette(arguments.profile, palette);

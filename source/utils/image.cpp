@@ -27,21 +27,10 @@ static vector<ImageSection> splitImageVertical(const fs::path &path, const cv::M
 			yMin -= diff;
 		}
 
-		cv::Mat sectionMat = cv::Mat::zeros(sectionSize, sectionSize, image.type());
-		for (int y = yMin; y < yMax; y++)
-		{
-			for (int x = xMin; x < xMax; x++)
-			{
-				cv::Vec3b bgrPixel = image.at<cv::Vec3b>(y, x);
-				sectionMat.at<cv::Vec3b>(y - yMin, x - xMin) = bgrPixel;
-			}
-		}
-
 		ImageSection section = {
-			sectionMat,
 			path,
 			xMin,
-			yMax,
+			yMin,
 			sectionSize,
 			sectionSize
 		};
@@ -72,21 +61,10 @@ static vector<ImageSection> splitImageHorizontal(const fs::path &path, const cv:
 			xMin -= diff;
 		}
 
-		cv::Mat sectionMat = cv::Mat::zeros(sectionSize, sectionSize, image.type());
-		for (int y = yMin; y < yMax; y++)
-		{
-			for (int x = xMin; x < xMax; x++)
-			{
-				cv::Vec3b bgrPixel = image.at<cv::Vec3b>(y, x);
-				sectionMat.at<cv::Vec3b>(y - yMin, x - xMin) = bgrPixel;
-			}
-		}
-
 		ImageSection section = {
-			sectionMat,
 			path,
 			xMin,
-			yMax,
+			yMin,
 			sectionSize,
 			sectionSize
 		};
@@ -129,6 +107,23 @@ cv::Vec3b getAverageColor(const cv::Mat &mat)
 	uchar averageGreen = (uchar)round(totalGreen / colorCount);
 	uchar averageRed = (uchar)round(totalRed / colorCount);
 	return cv::Vec3b(averageBlue, averageGreen, averageRed);
+}
+
+cv::Mat imreadImageSection(const ImageSection &mat)
+{
+	cv::Mat fullImage = cv::imread(mat.path.string(), cv::IMREAD_COLOR);
+	cv::Mat sectionImage = cv::Mat::zeros(mat.height, mat.width, fullImage.type());
+
+	for (int y = mat.y; y < mat.y + mat.height; y++)
+	{
+		for (int x = mat.x; x < mat.x + mat.width; x++)
+		{
+			cv::Vec3b color = fullImage.at<cv::Vec3b>(y, x);
+			sectionImage.at<cv::Vec3b>(y - mat.y, x - mat.x) = color;
+		}
+	}
+
+	return sectionImage;
 }
 
 nlohmann::json ImageSection::toJson() const

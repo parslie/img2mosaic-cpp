@@ -49,7 +49,6 @@ Palette loadPalette(string profile)
 		{
 			json imageSectionJson = *imageSectionsIter;
 			imageSections.push_back({
-				cv::Mat::zeros(0, 0, 0), // Pre-loading images here would waste memory
 				imageSectionJson["path"],
 				imageSectionJson["x"],
 				imageSectionJson["y"],

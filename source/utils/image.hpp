@@ -8,7 +8,6 @@
 
 struct ImageSection
 {
-	cv::Mat mat;
 	std::filesystem::path path;
 	int x, y;
 	int width, height;
@@ -18,3 +17,4 @@ struct ImageSection
 
 std::vector<ImageSection> splitImage(const std::filesystem::path &path);
 cv::Vec3b getAverageColor(const cv::Mat &mat);
+cv::Mat imreadImageSection(const ImageSection &mat);
