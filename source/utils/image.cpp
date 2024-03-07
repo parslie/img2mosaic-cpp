@@ -6,9 +6,9 @@ using namespace std;
 namespace fs = std::filesystem;
 using json = nlohmann::json;
 
-static vector<ImageSection> splitImageVertical(const fs::path &path, const cv::Mat &image, int sectionSize)
+static vector<ImageSection> splitImgVertical(const fs::path &path, const cv::Mat &img, int sectionSize)
 {
-	int height = image.size[0];
+	int height = img.size[0];
 	double rows = (double)height / (double)sectionSize;
 
 	vector<ImageSection> sections;
@@ -40,9 +40,9 @@ static vector<ImageSection> splitImageVertical(const fs::path &path, const cv::M
 	return sections;
 }
 
-static vector<ImageSection> splitImageHorizontal(const fs::path &path, const cv::Mat &image, int sectionSize)
+static vector<ImageSection> splitImgHorizontal(const fs::path &path, const cv::Mat &img, int sectionSize)
 {
-	int width = image.size[1];
+	int width = img.size[1];
 	double cols = (double)width / (double)sectionSize;
 
 	vector<ImageSection> sections;
@@ -74,29 +74,29 @@ static vector<ImageSection> splitImageHorizontal(const fs::path &path, const cv:
 	return sections;
 }
 
-vector<ImageSection> splitImage(const fs::path &path)
+vector<ImageSection> splitImg(const fs::path &path)
 {
-	cv::Mat image = cv::imread(path.string(), cv::IMREAD_COLOR);
+	cv::Mat img = cv::imread(path.string(), cv::IMREAD_COLOR);
 
-	if (image.size[0] > image.size[1])
-		return splitImageVertical(path, image, image.size[1]);
+	if (img.size[0] > img.size[1])
+		return splitImgVertical(path, img, img.size[1]);
 	else
-		return splitImageHorizontal(path, image, image.size[0]);
+		return splitImgHorizontal(path, img, img.size[0]);
 }
 
-cv::Vec3b getAverageColor(const cv::Mat &mat)
+cv::Vec3b getAverageColor(const cv::Mat &img)
 {
-	cv::Mat resizedMat;
-	cv::resize(mat, resizedMat, cv::Size(16, 16));
+	cv::Mat resizedImg;
+	cv::resize(img, resizedImg, cv::Size(16, 16));
 
 	double totalBlue = 0.0, totalGreen = 0.0, totalRed = 0.0;
 	int colorCount = 16 * 16;
 
-	for (int y = 0; y < resizedMat.size[0]; y++)
+	for (int y = 0; y < resizedImg.size[0]; y++)
 	{
-		for (int x = 0; x < resizedMat.size[1]; x++)
+		for (int x = 0; x < resizedImg.size[1]; x++)
 		{
-			cv::Vec3b color = resizedMat.at<cv::Vec3b>(y, x);
+			cv::Vec3b color = resizedImg.at<cv::Vec3b>(y, x);
 			totalBlue += color[0];
 			totalGreen += color[1];
 			totalRed += color[2];
@@ -109,21 +109,21 @@ cv::Vec3b getAverageColor(const cv::Mat &mat)
 	return cv::Vec3b(averageBlue, averageGreen, averageRed);
 }
 
-cv::Mat imreadImageSection(const ImageSection &mat)
+cv::Mat imreadImgSection(const ImageSection &imgSection)
 {
-	cv::Mat fullImage = cv::imread(mat.path.string(), cv::IMREAD_COLOR);
-	cv::Mat sectionImage = cv::Mat::zeros(mat.height, mat.width, fullImage.type());
+	cv::Mat fullImg = cv::imread(imgSection.path.string(), cv::IMREAD_COLOR);
+	cv::Mat sectionImg = cv::Mat::zeros(imgSection.height, imgSection.width, fullImg.type());
 
-	for (int y = mat.y; y < mat.y + mat.height; y++)
+	for (int y = imgSection.y; y < imgSection.y + imgSection.height; y++)
 	{
-		for (int x = mat.x; x < mat.x + mat.width; x++)
+		for (int x = imgSection.x; x < imgSection.x + imgSection.width; x++)
 		{
-			cv::Vec3b color = fullImage.at<cv::Vec3b>(y, x);
-			sectionImage.at<cv::Vec3b>(y - mat.y, x - mat.x) = color;
+			cv::Vec3b color = fullImg.at<cv::Vec3b>(y, x);
+			sectionImg.at<cv::Vec3b>(y - imgSection.y, x - imgSection.x) = color;
 		}
 	}
 
-	return sectionImage;
+	return sectionImg;
 }
 
 nlohmann::json ImageSection::toJson() const

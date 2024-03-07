@@ -12,7 +12,7 @@
 using namespace std;
 namespace fs = filesystem;
 
-static bool isImageFile(const fs::path path)
+static bool isImgFile(const fs::path path)
 {
 	string EXTS[] = { ".png", ".jpg", ".jpeg", ".webp" };
 	for (string ext : EXTS)
@@ -21,56 +21,56 @@ static bool isImageFile(const fs::path path)
 	return false;
 }
 
-static vector<fs::path> getUnanalyzedPaths(const string directoryPath, const bool recursive, const Palette &palette)
+static vector<fs::path> getUnanalyzedPaths(const string dirPath, const bool recursive, const Palette &palette)
 {
 	vector<fs::path> paths;
 
 	if (recursive)
 	{
-		for (auto &entry : fs::recursive_directory_iterator(directoryPath))
-			if (isImageFile(entry.path()) && !paletteContains(palette, entry.path().string()))
+		for (auto &entry : fs::recursive_directory_iterator(dirPath))
+			if (isImgFile(entry.path()) && !paletteContains(palette, entry.path().string()))
 				paths.push_back(entry.path());
 	}
 	else
 	{
-		for (auto &entry : fs::directory_iterator(directoryPath))
-			if (isImageFile(entry.path()) && !paletteContains(palette, entry.path().string()))
+		for (auto &entry : fs::directory_iterator(dirPath))
+			if (isImgFile(entry.path()) && !paletteContains(palette, entry.path().string()))
 				paths.push_back(entry.path());
 	}
 
 	return paths;
 }
 
-void analysis::run(const Arguments &arguments)
+void analyzeImgs(const Arguments &args)
 {
 	// 1. Initialize palette
-	Palette palette = loadPalette(arguments.profile);
+	Palette palette = loadPalette(args.profile);
 
 	// 2. Get paths that haven't been analyzed
-	vector<fs::path> paths = getUnanalyzedPaths(arguments.analysisArgs.directoryPath, arguments.analysisArgs.recursive, palette);
+	vector<fs::path> paths = getUnanalyzedPaths(args.analysis.dirPath, args.analysis.recursive, palette);
 	cout << "Got " << paths.size() << " unanalyzed images." << endl;
 
 	// 3. Iterate over each path
-	int newImageSections = 0;
+	int newImgSections = 0;
 	int pathsAnalyzed = 0;
 	for (fs::path path : paths)
 	{
-		vector<ImageSection> imageSections = splitImage(path);
+		vector<ImageSection> imgSections = splitImg(path);
 
-		for (ImageSection imageSection : imageSections)
+		for (ImageSection imgSection : imgSections)
 		{
-			cv::Mat sectionMat = imreadImageSection(imageSection);
-			cv::Vec3b averageColor = getAverageColor(sectionMat);
-			paletteAddImageSection(palette, averageColor, imageSection);
-			newImageSections += 1;
+			cv::Mat sectionImg = imreadImgSection(imgSection);
+			cv::Vec3b averageColor = getAverageColor(sectionImg);
+			paletteAddImgSection(palette, averageColor, imgSection);
+			newImgSections += 1;
 		}
 
 		pathsAnalyzed += 1;
 		cout << '\r' << pathsAnalyzed << "/" << paths.size() << " images analyzed.";
 	}
-	cout << "\nAdded " << newImageSections << " new image sections to the palette." << endl;
+	cout << "\nAdded " << newImgSections << " new image sections to the palette." << endl;
 
 	// 4. Save palette
-	savePalette(arguments.profile, palette);
+	savePalette(args.profile, palette);
 	cout << "Saved palette." << endl;
 }

@@ -4,7 +4,7 @@
 #include <sstream>
 
 // TODO: add validators
-static CLI::App *createGenerationCommand(CLI::App* app, GenerationArgs &arguments)
+static CLI::App *createGenerationCommand(CLI::App* app, GenerationArgs &args)
 {
 	CLI::App *command = app->add_subcommand(
 		"generate",
@@ -13,25 +13,25 @@ static CLI::App *createGenerationCommand(CLI::App* app, GenerationArgs &argument
 
 	command->add_option<std::string>(
 		"source",
-		arguments.sourcePath,
+		args.srcPath,
 		"Path to the image to mosaic"
 	)->option_text("PATH")->required(true);
 
 	command->add_option<std::string>(
 		"destination",
-		arguments.destinationPath,
+		args.dstPath,
 		"Path to output the mosaic to"
 	)->option_text("PATH")->required(true);
 
 	command->add_option<unsigned int>(
 		"-s,--source-size",
-		arguments.sourceSize,
+		args.srcSize,
 		"The size of the image to mosaic"
 	)->option_text("PIXELS");
 
 	command->add_option<unsigned int>(
 		"-p,--pixel-size",
-		arguments.pixelSize,
+		args.pixelSize,
 		"The size of the images to use as pixels"
 	)->option_text("PIXELS");
 
@@ -39,7 +39,7 @@ static CLI::App *createGenerationCommand(CLI::App* app, GenerationArgs &argument
 }
 
 // TODO: add validators
-static CLI::App *createAnalysisCommand(CLI::App* app, AnalysisArgs &arguments)
+static CLI::App *createAnalysisCommand(CLI::App* app, AnalysisArgs &args)
 {
 	CLI::App *command = app->add_subcommand(
 		"analyze", 
@@ -48,13 +48,13 @@ static CLI::App *createAnalysisCommand(CLI::App* app, AnalysisArgs &arguments)
 
 	command->add_option<std::string>(
 		"directory",
-		arguments.directoryPath,
+		args.dirPath,
 		"The directory containing the images to analyze"
 	)->option_text("PATH")->required(true);
 
 	command->add_flag<bool>(
 		"-r,--recursive",
-		arguments.recursive,
+		args.recursive,
 		"Analyze images in subdirectories as well"
 	);
 
@@ -62,7 +62,7 @@ static CLI::App *createAnalysisCommand(CLI::App* app, AnalysisArgs &arguments)
 }
 
 // TODO: add validators
-Arguments parseArguments(int argc, const char* const* argv)
+Arguments parseArgs(int argc, const char* const* argv)
 {
 	Arguments arguments;
 
@@ -80,8 +80,8 @@ Arguments parseArguments(int argc, const char* const* argv)
 		"Print debug statements"
 	);
 
-	CLI::App* generation = createGenerationCommand(&app, arguments.generationArgs);
-	CLI::App* analysis = createAnalysisCommand(&app, arguments.analysisArgs);
+	CLI::App* generation = createGenerationCommand(&app, arguments.generation);
+	CLI::App* analysis = createAnalysisCommand(&app, arguments.analysis);
 
     try {
 		app.parse(argc, argv);
@@ -89,8 +89,8 @@ Arguments parseArguments(int argc, const char* const* argv)
         exit(app.exit(e));
     }
 
-	arguments.generationArgs.parsed = generation->parsed();
-	arguments.analysisArgs.parsed = analysis->parsed();
+	arguments.generation.parsed = generation->parsed();
+	arguments.analysis.parsed = analysis->parsed();
 
 	if (arguments.debug) {
 		std::cout << "arguments = " << arguments.toString() << std::endl;
@@ -106,16 +106,16 @@ std::string Arguments::toString()
 	stringStream << "\tprofile = " << this->profile << "\n";
 	stringStream << "\tdebug = " << this->debug << "\n";
 	stringStream << "\tgeneration = {\n";
-	stringStream << "\t\tparsed = " << this->generationArgs.parsed << "\n";
-	stringStream << "\t\tsource = '" << this->generationArgs.sourcePath << "'\n";
-	stringStream << "\t\tdestination = '" << this->generationArgs.destinationPath << "'\n";
-	stringStream << "\t\tsource size = " << this->generationArgs.sourceSize << "\n";
-	stringStream << "\t\tpixel size = " << this->generationArgs.pixelSize << "\n";
+	stringStream << "\t\tparsed = " << this->generation.parsed << "\n";
+	stringStream << "\t\tsource = '" << this->generation.srcPath << "'\n";
+	stringStream << "\t\tdestination = '" << this->generation.dstPath << "'\n";
+	stringStream << "\t\tsource size = " << this->generation.srcSize << "\n";
+	stringStream << "\t\tpixel size = " << this->generation.pixelSize << "\n";
 	stringStream << "\t}\n";
 	stringStream << "\tanalysis = {\n";
-	stringStream << "\t\tparsed = " << this->analysisArgs.parsed << "\n";
-	stringStream << "\t\tdirectory = '" << this->analysisArgs.directoryPath << "'\n";
-	stringStream << "\t\trecursive = " << this->analysisArgs.recursive << "\n";
+	stringStream << "\t\tparsed = " << this->analysis.parsed << "\n";
+	stringStream << "\t\tdirectory = '" << this->analysis.dirPath << "'\n";
+	stringStream << "\t\trecursive = " << this->analysis.recursive << "\n";
 	stringStream << "\t}\n";
 	stringStream << "}";
 	return stringStream.str();

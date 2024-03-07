@@ -13,5 +13,5 @@ void savePalette(const std::string profile, const Palette &palette);
 void printPalette(const Palette &palette);
 
 bool paletteContains(const Palette &palette, const std::string targetPath);
-void paletteAddImageSection(Palette &palette, const cv::Vec3b &color, const ImageSection &imageSection);
-cv::Mat paletteGetImage(Palette &palette, const cv::Vec3b &color, unsigned int size);
+void paletteAddImgSection(Palette &palette, const cv::Vec3b &color, const ImageSection &imgSection);
+cv::Mat paletteGetImg(Palette &palette, const cv::Vec3b &color, unsigned int size);

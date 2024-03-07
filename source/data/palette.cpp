@@ -15,6 +15,8 @@ using namespace std;
 namespace fs = filesystem;
 using json = nlohmann::json;
 
+constexpr auto TAB = "   ";
+
 static fs::path getPalettePath(string profile)
 {
 	PWSTR localPath = NULL;
@@ -42,22 +44,22 @@ Palette loadPalette(string profile)
 	for (auto iter = data.begin(); iter != data.end(); iter++)
 	{
 		string colorString = iter.key();
-		json imageSectionsJson = iter.value();
-		vector<ImageSection> imageSections;
+		json imgSectionsJson = iter.value();
+		vector<ImageSection> imgSections;
 
-		for (auto imageSectionsIter = imageSectionsJson.begin(); imageSectionsIter != imageSectionsJson.end(); imageSectionsIter++)
+		for (auto imgSectionsIter = imgSectionsJson.begin(); imgSectionsIter != imgSectionsJson.end(); imgSectionsIter++)
 		{
-			json imageSectionJson = *imageSectionsIter;
-			imageSections.push_back({
-				imageSectionJson["path"],
-				imageSectionJson["x"],
-				imageSectionJson["y"],
-				imageSectionJson["width"],
-				imageSectionJson["height"],
+			json imgSectionJson = *imgSectionsIter;
+			imgSections.push_back({
+				imgSectionJson["path"],
+				imgSectionJson["x"],
+				imgSectionJson["y"],
+				imgSectionJson["width"],
+				imgSectionJson["height"],
 			});
 		}
 
-		palette[colorString] = imageSections;
+		palette[colorString] = imgSections;
 	}
 
 	return palette;
@@ -68,19 +70,17 @@ void savePalette(string profile, const Palette &palette)
 	fs::path palettePath = getPalettePath(profile);
 
 	json data = json::object();
-	for (auto &[colorString, imageSections] : palette)
+	for (auto &[colorString, imgSections] : palette)
 	{
-		json imagesJson = json::array();
-		for (auto &imageSection : imageSections)
-			imagesJson.push_back(imageSection.toJson());
-		data[colorString] = imagesJson;
+		json imgsJson = json::array();
+		for (auto &imgSection : imgSections)
+			imgsJson.push_back(imgSection.toJson());
+		data[colorString] = imgsJson;
 	}
 
 	ofstream file(palettePath);
 	file << data << endl;
 }
-
-constexpr auto TAB = "   ";
 
 void printPalette(const Palette &palette)
 {
@@ -88,15 +88,15 @@ void printPalette(const Palette &palette)
 	for (auto iter = palette.begin(); iter != palette.end(); iter++)
 	{
 		string colorString = (*iter).first;
-		vector<ImageSection> imageSections = (*iter).second;
+		vector<ImageSection> imgSections = (*iter).second;
 
 		cout << TAB << "\"" << colorString << "\": [";
-		for (auto imageSectionsIter = imageSections.begin(); imageSectionsIter != imageSections.end(); imageSectionsIter++)
+		for (auto imgSectionsIter = imgSections.begin(); imgSectionsIter != imgSections.end(); imgSectionsIter++)
 		{
-			ImageSection imageSection = *imageSectionsIter;
+			ImageSection imgSection = *imgSectionsIter;
 
-			cout << "\"" << imageSection.path.string() << "\""; // TODO: print whole image section?
-			if (imageSectionsIter + 1 != imageSections.end())
+			cout << "\"" << imgSection.path.string() << "\""; // TODO: print whole image section?
+			if (imgSectionsIter + 1 != imgSections.end())
 				cout << ", ";
 		}
 		cout << TAB << "]\n,";
@@ -106,64 +106,64 @@ void printPalette(const Palette &palette)
 
 bool paletteContains(const Palette &palette, const string targetPath)
 {
-	for (auto &[_, imageSections] : palette)
-		for (auto &imageSection : imageSections)
-			if (imageSection.path == targetPath)
+	for (auto &[_, imgSections] : palette)
+		for (auto &imgSection : imgSections)
+			if (imgSection.path == targetPath)
 				return true;
 
 	return false;
 }
 
-void paletteAddImageSection(Palette &palette, const cv::Vec3b &color, const ImageSection &imageSection)
+void paletteAddImgSection(Palette &palette, const cv::Vec3b &color, const ImageSection &imgSection)
 {
 	string colorString = colorToString(color);
 
-	vector<ImageSection> imageSections;
+	vector<ImageSection> imgSections;
 	if (palette.find(colorString) != palette.end())
-		imageSections = palette.at(colorString);
+		imgSections = palette.at(colorString);
 
-	imageSections.push_back(imageSection);
-	palette[colorString] = imageSections;
+	imgSections.push_back(imgSection);
+	palette[colorString] = imgSections;
 }
 
 static cv::Vec3b getNearestColor(Palette &palette, const cv::Vec3b &targetColor)
 {
 	cv::Vec3b nearestColor;
-	double nearestDistance = 442.0; // Just above max possible distance
+	double nearestDist = 442.0; // Just above max possible distance
 
 	for (auto &[key, _] : palette)
 	{
 		cv::Vec3b color = stringToColor(key);
-		double distance = getColorDistance(color, targetColor);
+		double dist = getColorDist(color, targetColor);
 
-		if (distance < nearestDistance)
+		if (dist < nearestDist)
 		{
 			nearestColor = color;
-			nearestDistance = distance;
+			nearestDist = dist;
 		}
 	}
 
 	return nearestColor;
 }
 
-cv::Mat paletteGetImage(Palette &palette, const cv::Vec3b &color, unsigned int size)
+cv::Mat paletteGetImg(Palette &palette, const cv::Vec3b &color, unsigned int size)
 {
 	string colorString = colorToString(color);
-	vector<ImageSection> imageSections;
+	vector<ImageSection> imgSections;
 	
 	if (palette.contains(colorString))
 	{
-		imageSections = palette[colorString];
+		imgSections = palette[colorString];
 	}
 	else
 	{
 		string nearColorString = colorToString(getNearestColor(palette, color));
-		imageSections = palette[nearColorString];
+		imgSections = palette[nearColorString];
 	}
 
-	int index = (int)round((double)rand() / RAND_MAX * (imageSections.size() - 1));
-	ImageSection imageSection = imageSections[index];
-	cv::Mat image;
-	cv::resize(imreadImageSection(imageSection), image, cv::Size((int)size, (int)size));
-	return image;
+	int index = (int)round((double)rand() / RAND_MAX * (imgSections.size() - 1));
+	ImageSection imgSection = imgSections[index];
+	cv::Mat img;
+	cv::resize(imreadImgSection(imgSection), img, cv::Size((int)size, (int)size));
+	return img;
 }

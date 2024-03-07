@@ -27,7 +27,7 @@ cv::Vec3b stringToColor(const string &colorString)
 	return cv::Vec3b(blue, green, red);
 }
 
-double getColorDistance(const cv::Vec3b &colorA, const cv::Vec3b &colorB)
+double getColorDist(const cv::Vec3b &colorA, const cv::Vec3b &colorB)
 {
 	double distance = 0.0;
 

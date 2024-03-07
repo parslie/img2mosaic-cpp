@@ -15,6 +15,6 @@ struct ImageSection
 	nlohmann::json toJson() const;
 };
 
-std::vector<ImageSection> splitImage(const std::filesystem::path &path);
-cv::Vec3b getAverageColor(const cv::Mat &mat);
-cv::Mat imreadImageSection(const ImageSection &mat);
+std::vector<ImageSection> splitImg(const std::filesystem::path &path);
+cv::Vec3b getAverageColor(const cv::Mat &img);
+cv::Mat imreadImgSection(const ImageSection &imgSection);

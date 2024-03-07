@@ -8,64 +8,64 @@
 
 using namespace std;
 
-cv::Mat loadSourceImage(string path, unsigned int size)
+cv::Mat loadSourceImg(string path, unsigned int size)
 {
-	cv::Mat originalImage = cv::imread(path);
+	cv::Mat originalImg = cv::imread(path);
 
 	double resizeFactor = min(
-		(double)size / originalImage.rows,
-		(double)size / originalImage.cols
+		(double)size / originalImg.rows,
+		(double)size / originalImg.cols
 	);
 
 	if (resizeFactor < 1.0)
 	{
-		int resizedRows = round(originalImage.rows * resizeFactor);
-		int resizedCols = round(originalImage.cols * resizeFactor);
-		cv::Mat resizedImage;
-		cv::resize(originalImage, resizedImage, cv::Size(resizedCols, resizedRows));
-		return resizedImage;
+		int resizedRows = round(originalImg.rows * resizeFactor);
+		int resizedCols = round(originalImg.cols * resizeFactor);
+		cv::Mat resizedImg;
+		cv::resize(originalImg, resizedImg, cv::Size(resizedCols, resizedRows));
+		return resizedImg;
 	}
 	else
 	{
-		return originalImage;
+		return originalImg;
 	}
 }
 
-void generation::run(const Arguments &arguments)
+void generateImg(const Arguments &args)
 {
 	// 1. Initialize palette
-	Palette palette = loadPalette(arguments.profile);
+	Palette palette = loadPalette(args.profile);
 
 	// 2. Load source image
-	cv::Mat sourceImage = loadSourceImage(arguments.generationArgs.sourcePath, arguments.generationArgs.sourceSize);
-	int sourceRows = sourceImage.rows;
-	int sourceCols = sourceImage.cols;
+	cv::Mat srcImg = loadSourceImg(args.generation.srcPath, args.generation.srcSize);
+	int srcRows = srcImg.rows;
+	int srcCols = srcImg.cols;
 	
 	// 3. Initialize destination image
-	int destinationRows = arguments.generationArgs.pixelSize * sourceRows;
-	int destinationCols = arguments.generationArgs.pixelSize * sourceCols;
-	cv::Mat destinationImage = cv::Mat::zeros(destinationRows, destinationCols, sourceImage.type());
+	int destRows = args.generation.pixelSize * srcRows;
+	int destCols = args.generation.pixelSize * srcCols;
+	cv::Mat destImg = cv::Mat::zeros(destRows, destCols, srcImg.type());
 	
 	// 4. Iterate over each pixel in source image
 	unsigned int pixelsInserted = 0;
-	unsigned int pixelCount = sourceRows * sourceCols;
-	for (int sourceCol = 0; sourceCol < sourceCols; sourceCol++)
+	unsigned int pixelCount = srcRows * srcCols;
+	for (int srcCol = 0; srcCol < srcCols; srcCol++)
 	{
-		for (int sourceRow = 0; sourceRow < sourceRows; sourceRow++)
+		for (int srcRow = 0; srcRow < srcRows; srcRow++)
 		{
 			cout << '\r' << pixelsInserted << '/' << pixelCount << " pixels inserted.";
 
-			cv::Vec3b sourceColor = sourceImage.at<cv::Vec3b>(sourceRow, sourceCol);
-			cv::Mat pixelImage = paletteGetImage(palette, sourceColor, arguments.generationArgs.pixelSize);
+			cv::Vec3b srcColor = srcImg.at<cv::Vec3b>(srcRow, srcCol);
+			cv::Mat pixelImg = paletteGetImg(palette, srcColor, args.generation.pixelSize);
 			
-			for (int pixelCol = 0; pixelCol < pixelImage.cols; pixelCol++)
+			for (int pixelCol = 0; pixelCol < pixelImg.cols; pixelCol++)
 			{
-				for (int pixelRow = 0; pixelRow < pixelImage.rows; pixelRow++)
+				for (int pixelRow = 0; pixelRow < pixelImg.rows; pixelRow++)
 				{
-					cv::Vec3b color = pixelImage.at<cv::Vec3b>(pixelRow, pixelCol);
-					int destinationRow = sourceRow * pixelImage.rows + pixelRow;
-					int destinationCol = sourceCol * pixelImage.cols + pixelCol;
-					destinationImage.at<cv::Vec3b>(destinationRow, destinationCol) = color;
+					cv::Vec3b color = pixelImg.at<cv::Vec3b>(pixelRow, pixelCol);
+					int destRow = srcRow * pixelImg.rows + pixelRow;
+					int destCol = srcCol * pixelImg.cols + pixelCol;
+					destImg.at<cv::Vec3b>(destRow, destCol) = color;
 				}
 			}
 
@@ -75,5 +75,5 @@ void generation::run(const Arguments &arguments)
 	cout << '\r' << pixelCount << '/' << pixelCount << " pixels inserted.";
 
 	// 5. Save destination image
-	cv::imwrite(arguments.generationArgs.destinationPath, destinationImage);
+	cv::imwrite(args.generation.dstPath, destImg);
 }

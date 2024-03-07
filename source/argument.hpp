@@ -5,16 +5,16 @@
 struct GenerationArgs
 {
 	bool parsed = false;
-	std::string sourcePath = "";
-	std::string destinationPath = "";
-	unsigned int sourceSize = 128;
+	std::string srcPath = "";
+	std::string dstPath = "";
+	unsigned int srcSize = 128;
 	unsigned int pixelSize = 16;
 };
 
 struct AnalysisArgs
 {
 	bool parsed = false;
-	std::string directoryPath = "";
+	std::string dirPath = "";
 	bool recursive = false;
 };
 
@@ -23,10 +23,10 @@ struct Arguments
 	std::string profile = "default";
 	bool debug = false;
 
-	GenerationArgs generationArgs;
-	AnalysisArgs analysisArgs;
+	GenerationArgs generation;
+	AnalysisArgs analysis;
 
 	std::string toString();
 };
 
-Arguments parseArguments(int argc, const char* const *argv);
+Arguments parseArgs(int argc, const char* const *argv);

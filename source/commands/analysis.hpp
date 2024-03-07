@@ -1,9 +1,7 @@
 #pragma once
 
 #include "../argument.hpp"
+
 #include <string>
 
-namespace analysis
-{
-	void run(const Arguments &arguments);
-}
+void analyzeImgs(const Arguments &args);
