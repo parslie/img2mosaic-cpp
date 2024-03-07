@@ -1,3 +1,6 @@
 out/
 .vs/
 vcpkg_installed/
+
+**.png
+**.jpg
