@@ -26,3 +26,18 @@ cv::Vec3b stringToColor(const string &colorString)
 
 	return cv::Vec3b(blue, green, red);
 }
+
+double getColorDistance(const cv::Vec3b &colorA, const cv::Vec3b &colorB)
+{
+	double distance = 0.0;
+
+	double redDifference = (double)((int)(colorA[2]) - (int)(colorB[2]));
+	double greenDifference = (double)((int)(colorA[1]) - (int)(colorB[1]));
+	double blueDifference = (double)((int)(colorA[0]) - (int)(colorB[0]));
+
+	distance += pow(redDifference, 2);
+	distance += pow(greenDifference, 2);
+	distance += pow(blueDifference, 2);
+
+	return sqrt(distance);
+}
