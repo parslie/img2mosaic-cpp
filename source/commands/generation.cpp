@@ -47,10 +47,14 @@ void generation::run(const Arguments &arguments)
 	cv::Mat destinationImage = cv::Mat::zeros(destinationRows, destinationCols, sourceImage.type());
 	
 	// 4. Iterate over each pixel in source image
+	unsigned int pixelsInserted = 0;
+	unsigned int pixelCount = sourceRows * sourceCols;
 	for (int sourceCol = 0; sourceCol < sourceCols; sourceCol++)
 	{
 		for (int sourceRow = 0; sourceRow < sourceRows; sourceRow++)
 		{
+			cout << '\r' << pixelsInserted << '/' << pixelCount << " pixels inserted.";
+
 			cv::Vec3b sourceColor = sourceImage.at<cv::Vec3b>(sourceRow, sourceCol);
 			cv::Mat pixelImage = paletteGetImage(palette, sourceColor, arguments.generationArgs.pixelSize);
 			
@@ -64,8 +68,11 @@ void generation::run(const Arguments &arguments)
 					destinationImage.at<cv::Vec3b>(destinationRow, destinationCol) = color;
 				}
 			}
+
+			pixelsInserted++;
 		}
 	}
+	cout << '\r' << pixelCount << '/' << pixelCount << " pixels inserted.";
 
 	// 5. Save destination image
 	cv::imwrite(arguments.generationArgs.destinationPath, destinationImage);
