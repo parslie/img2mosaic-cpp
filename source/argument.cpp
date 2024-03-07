@@ -24,7 +24,7 @@ static CLI::App *createGenerationCommand(CLI::App* app, GenerationArgs &argument
 	)->option_text("PATH")->required(true);
 
 	command->add_option<unsigned int>(
-		"-d,--source-size",
+		"-s,--source-size",
 		arguments.sourceSize,
 		"The size of the image to mosaic"
 	)->option_text("PIXELS");
