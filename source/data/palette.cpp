@@ -114,7 +114,7 @@ bool paletteContains(const Palette &palette, const string targetPath)
 	return false;
 }
 
-void paletteAddImgSection(Palette &palette, const cv::Vec3b &color, const ImageSection &imgSection)
+void paletteAddImgSection(Palette &palette, const Color &color, const ImageSection &imgSection)
 {
 	string colorString = colorToString(color);
 
@@ -126,14 +126,14 @@ void paletteAddImgSection(Palette &palette, const cv::Vec3b &color, const ImageS
 	palette[colorString] = imgSections;
 }
 
-static cv::Vec3b getNearestColor(Palette &palette, const cv::Vec3b &targetColor)
+static Color getNearestColor(Palette &palette, const Color &targetColor)
 {
-	cv::Vec3b nearestColor;
+	Color nearestColor;
 	double nearestDist = 442.0; // Just above max possible distance
 
 	for (auto &[key, _] : palette)
 	{
-		cv::Vec3b color = stringToColor(key);
+		Color color = stringToColor(key);
 		double dist = getColorDist(color, targetColor);
 
 		if (dist < nearestDist)
@@ -146,7 +146,7 @@ static cv::Vec3b getNearestColor(Palette &palette, const cv::Vec3b &targetColor)
 	return nearestColor;
 }
 
-cv::Mat paletteGetImg(Palette &palette, const cv::Vec3b &color, unsigned int size)
+Image paletteGetImg(Palette &palette, const Color &color, uint size)
 {
 	string colorString = colorToString(color);
 	vector<ImageSection> imgSections;
@@ -163,7 +163,5 @@ cv::Mat paletteGetImg(Palette &palette, const cv::Vec3b &color, unsigned int siz
 
 	int index = (int)round((double)rand() / RAND_MAX * (imgSections.size() - 1));
 	ImageSection imgSection = imgSections[index];
-	cv::Mat img;
-	cv::resize(imreadImgSection(imgSection), img, cv::Size((int)size, (int)size));
-	return img;
+	return imgSection.toImage(size);
 }

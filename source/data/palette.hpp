@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../utils/image.hpp"
+#include "../utils/color.hpp"
 
 #include <map>
 #include <string>
@@ -13,5 +14,5 @@ void savePalette(const std::string profile, const Palette &palette);
 void printPalette(const Palette &palette);
 
 bool paletteContains(const Palette &palette, const std::string targetPath);
-void paletteAddImgSection(Palette &palette, const cv::Vec3b &color, const ImageSection &imgSection);
-cv::Mat paletteGetImg(Palette &palette, const cv::Vec3b &color, unsigned int size);
+void paletteAddImgSection(Palette &palette, const Color &color, const ImageSection &imgSection);
+Image paletteGetImg(Palette &palette, const Color &color, uint size);

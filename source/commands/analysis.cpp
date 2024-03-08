@@ -47,6 +47,7 @@ void analyzeImgs(const Arguments &args)
 	Palette palette = loadPalette(args.profile);
 
 	// 2. Get paths that haven't been analyzed
+	cout << "Getting unanalyzed images." << endl;
 	vector<fs::path> paths = getUnanalyzedPaths(args.analysis.dirPath, args.analysis.recursive, palette);
 	cout << "Got " << paths.size() << " unanalyzed images." << endl;
 
@@ -55,12 +56,13 @@ void analyzeImgs(const Arguments &args)
 	int pathsAnalyzed = 0;
 	for (fs::path path : paths)
 	{
-		vector<ImageSection> imgSections = splitImg(path);
+		Image img(path);
+		vector<ImageSection> imgSections = img.split();
 
 		for (ImageSection imgSection : imgSections)
 		{
-			cv::Mat sectionImg = imreadImgSection(imgSection);
-			cv::Vec3b averageColor = getAverageColor(sectionImg);
+			Image sectionImg = imgSection.toImage(16);
+			Color averageColor = sectionImg.averageColor();
 			paletteAddImgSection(palette, averageColor, imgSection);
 			newImgSections += 1;
 		}

@@ -4,14 +4,14 @@
 
 using namespace std;
 
-string colorToString(const cv::Vec3b &color)
+string colorToString(const Color &color)
 {
 	stringstream sstream;
 	sstream << (int)color[2] << "," << (int)color[1] << "," << (int)color[0];
 	return sstream.str();
 }
 
-cv::Vec3b stringToColor(const string &colorString)
+Color stringToColor(const string &colorString)
 {
 	size_t firstSplit = colorString.find(',');
 	size_t secondSplit = colorString.find(',', firstSplit + 1);
@@ -27,7 +27,7 @@ cv::Vec3b stringToColor(const string &colorString)
 	return cv::Vec3b(blue, green, red);
 }
 
-double getColorDist(const cv::Vec3b &colorA, const cv::Vec3b &colorB)
+double getColorDist(const Color &colorA, const Color &colorB)
 {
 	double distance = 0.0;
 

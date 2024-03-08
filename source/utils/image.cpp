@@ -6,97 +6,100 @@ using namespace std;
 namespace fs = std::filesystem;
 using json = nlohmann::json;
 
-static vector<ImageSection> splitImgVertical(const fs::path &path, const cv::Mat &img, int sectionSize)
+// Image
+
+Image::Image(uint width, uint height, fs::path path)
 {
-	int height = img.size[0];
-	double rows = (double)height / (double)sectionSize;
+	this->path = path;
+	this->width = width;
+	this->height = height;
+	this->mat = cv::Mat::zeros((int)height, (int)width, CV_8UC3);
+}
 
-	vector<ImageSection> sections;
+Image::Image(fs::path path)
+{
+	this->path = path;
+	this->mat = cv::imread(path.string());
+	this->width = (uint)(this->mat.cols);
+	this->height = (uint)(this->mat.rows);
+}
 
-	for (int row = 0; row < rows; row++)
+void Image::resize(uint width, uint height)
+{
+	cv::Mat resizedMat;
+	cv::resize(this->mat, resizedMat, cv::Size((int)width, (int)height));
+	this->mat = resizedMat;
+	this->width = width;
+	this->height = height;
+}
+
+double Image::containInSize(uint size)
+{
+	double resizeFactor = min(
+		(double)size / this->width,
+		(double)size / this->height
+	);
+
+	if (resizeFactor < 1.0)
 	{
-		int xMin = 0;
-		int xMax = sectionSize;
-		int yMin = sectionSize * row;
-		int yMax = sectionSize * (row + 1);
+		uint width = (uint)ceil(resizeFactor * this->width);
+		uint height = (uint)ceil(resizeFactor * this->height);
 
-		if (yMax > height)
-		{
-			int diff = yMax - height;
-			yMax -= diff;
-			yMin -= diff;
-		}
+		cv::Mat resizedMat;
+		cv::resize(this->mat, resizedMat, cv::Size((int)width, (int)height));
+		this->mat = resizedMat;
+		this->width = width;
+		this->height = height;
 
-		ImageSection section = {
-			path,
-			xMin,
-			yMin,
-			sectionSize,
-			sectionSize
-		};
-		sections.push_back(section);
+		return resizeFactor;
 	}
 
-	return sections;
+	return 1.0;
 }
 
-static vector<ImageSection> splitImgHorizontal(const fs::path &path, const cv::Mat &img, int sectionSize)
+double Image::fitToSize(uint size)
 {
-	int width = img.size[1];
-	double cols = (double)width / (double)sectionSize;
+	double resizeFactor = max(
+		(double)size / this->width,
+		(double)size / this->height
+	);
 
-	vector<ImageSection> sections;
-
-	for (int col = 0; col < cols; col++)
+	if (resizeFactor < 1.0)
 	{
-		int xMin = sectionSize * col;
-		int xMax = sectionSize * (col + 1);
-		int yMin = 0;
-		int yMax = sectionSize;
+		uint width = (uint)ceil(resizeFactor * this->width);
+		uint height = (uint)ceil(resizeFactor * this->height);
 
-		if (xMax > width)
-		{
-			int diff = xMax - width;
-			xMax -= diff;
-			xMin -= diff;
-		}
+		cv::Mat resizedMat;
+		cv::resize(this->mat, resizedMat, cv::Size((int)width, (int)height));
+		this->mat = resizedMat;
+		this->width = width;
+		this->height = height;
 
-		ImageSection section = {
-			path,
-			xMin,
-			yMin,
-			sectionSize,
-			sectionSize
-		};
-		sections.push_back(section);
+		return resizeFactor;
 	}
 
-	return sections;
+	return 1.0;
 }
 
-vector<ImageSection> splitImg(const fs::path &path)
+Color &Image::at(uint x, uint y)
 {
-	cv::Mat img = cv::imread(path.string(), cv::IMREAD_COLOR);
-
-	if (img.size[0] > img.size[1])
-		return splitImgVertical(path, img, img.size[1]);
-	else
-		return splitImgHorizontal(path, img, img.size[0]);
+	return this->mat.at<Color>((int)y, (int)x);
 }
 
-cv::Vec3b getAverageColor(const cv::Mat &img)
+Color Image::averageColor()
 {
-	cv::Mat resizedImg;
-	cv::resize(img, resizedImg, cv::Size(16, 16));
+	cv::Mat resizedMat;
+	cv::resize(this->mat, resizedMat, cv::Size(16, 16), 0.0, 0.0, cv::INTER_CUBIC);
+	// TODO: test if resizing to 1x1 gives average color
 
 	double totalBlue = 0.0, totalGreen = 0.0, totalRed = 0.0;
-	int colorCount = 16 * 16;
+	uint colorCount = 16 * 16;
 
-	for (int y = 0; y < resizedImg.size[0]; y++)
+	for (int y = 0; y < 16; y++)
 	{
-		for (int x = 0; x < resizedImg.size[1]; x++)
+		for (int x = 0; x < 16; x++)
 		{
-			cv::Vec3b color = resizedImg.at<cv::Vec3b>(y, x);
+			cv::Vec3b color = resizedMat.at<cv::Vec3b>(y, x);
 			totalBlue += color[0];
 			totalGreen += color[1];
 			totalRed += color[2];
@@ -109,30 +112,140 @@ cv::Vec3b getAverageColor(const cv::Mat &img)
 	return cv::Vec3b(averageBlue, averageGreen, averageRed);
 }
 
-cv::Mat imreadImgSection(const ImageSection &imgSection)
+std::vector<ImageSection> Image::split()
 {
-	cv::Mat fullImg = cv::imread(imgSection.path.string(), cv::IMREAD_COLOR);
-	cv::Mat sectionImg = cv::Mat::zeros(imgSection.height, imgSection.width, fullImg.type());
-
-	for (int y = imgSection.y; y < imgSection.y + imgSection.height; y++)
-	{
-		for (int x = imgSection.x; x < imgSection.x + imgSection.width; x++)
-		{
-			cv::Vec3b color = fullImg.at<cv::Vec3b>(y, x);
-			sectionImg.at<cv::Vec3b>(y - imgSection.y, x - imgSection.x) = color;
-		}
-	}
-
-	return sectionImg;
+	if (this->width > this->height)
+		return this->splitHorizontal();
+	else
+		return this->splitVertical();
 }
+
+uint Image::getWidth() const
+{
+	return this->width;
+}
+
+uint Image::getHeight() const
+{
+	return this->height;
+}
+
+void Image::save()
+{
+	cv::imwrite(this->path.string(), this->mat);
+}
+
+std::vector<ImageSection> Image::splitHorizontal() const
+{
+	uint sectionSize = min(this->width, this->height);
+	double cols = (double)(this->width) / (double)sectionSize;
+
+	vector<ImageSection> sections;
+	for (uint col = 0; col < cols; col++)
+	{
+		uint xMin = sectionSize * col;
+		uint xMax = sectionSize * (col + 1);
+		uint yMin = 0;
+		uint yMax = sectionSize;
+
+		if (xMax > this->width)
+		{
+			uint diff = xMax - this->width;
+			xMax -= diff;
+			xMin -= diff;
+		}
+
+		ImageSection section = {
+			this->path,
+			xMin,
+			yMin,
+			sectionSize,
+			sectionSize
+		};
+		sections.push_back(section);
+	}
+	return sections;
+}
+
+std::vector<ImageSection> Image::splitVertical() const
+{
+	uint sectionSize = min(this->width, this->height);
+	double rows = (double)(this->height) / (double)sectionSize;
+
+	vector<ImageSection> sections;
+	for (uint row = 0; row < rows; row++)
+	{
+		uint xMin = 0;
+		uint xMax = sectionSize;
+		uint yMin = sectionSize * row;
+		uint yMax = sectionSize * (row + 1);
+
+		if (yMax > this->height)
+		{
+			uint diff = yMax - this->height;
+			yMax -= diff;
+			yMin -= diff;
+		}
+
+		ImageSection section = {
+			this->path,
+			xMin,
+			yMin,
+			sectionSize,
+			sectionSize
+		};
+		sections.push_back(section);
+	}
+	return sections;
+}
+
+// ImageSection
 
 nlohmann::json ImageSection::toJson() const
 {
 	json data = json::object();
 	data["path"] = this->path.string();
-	data["x"] = this->x;
-	data["y"] = this->y;
-	data["width"] = this->width;
-	data["height"] = this->height;
+	data["x"] = (int)(this->x);
+	data["y"] = (int)(this->y);
+	data["width"] = (int)(this->width);
+	data["height"] = (int)(this->height);
 	return data;
+}
+
+Image ImageSection::toImage(uint size)
+{
+	Image fullImg(this->path);
+
+	double scaleFactor;
+	if (size == 0.0)
+	{
+		size = min(fullImg.getWidth(), fullImg.getHeight());
+		scaleFactor = 1.0;
+	}
+	else
+	{
+		scaleFactor = fullImg.fitToSize(size);
+	}
+
+	fs::path sectionPath = this->path.stem();
+	sectionPath += "_section";
+	sectionPath += this->path.extension();
+	Image sectionImg(size, size, this->path);
+
+	uint xMin = (uint)floor(this->x * scaleFactor);
+	uint xMax = (uint)floor((this->x + this->width) * scaleFactor);
+	uint yMin = (uint)floor(this->y * scaleFactor);
+	uint yMax = (uint)floor((this->y + this->height) * scaleFactor);
+
+	for (uint y = yMin; y < yMax; y++)
+	{
+		for (uint x = xMin; x < xMax; x++)
+		{
+			uint sectionX = x - xMin;
+			uint sectionY = y - yMin;
+			sectionImg.at(sectionX, sectionY) = fullImg.at(x, y);
+		}
+	}
+
+	return sectionImg;
 }

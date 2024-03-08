@@ -4,6 +4,8 @@
 
 #include <opencv2/opencv.hpp>
 
-std::string colorToString(const cv::Vec3b &color);
-cv::Vec3b stringToColor(const std::string &colorString);
-double getColorDist(const cv::Vec3b &colorA, const cv::Vec3b &colorB);
+typedef cv::Vec3b Color;
+
+std::string colorToString(const Color &color);
+Color stringToColor(const std::string &colorString);
+double getColorDist(const Color &colorA, const Color &colorB);
