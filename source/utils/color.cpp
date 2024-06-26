@@ -4,40 +4,35 @@
 
 using namespace std;
 
-string colorToString(const Color &color)
-{
+string color_to_string(const Color &color) {
 	stringstream sstream;
 	sstream << (int)color[2] << "," << (int)color[1] << "," << (int)color[0];
 	return sstream.str();
 }
 
-Color stringToColor(const string &colorString)
-{
-	size_t firstSplit = colorString.find(',');
-	size_t secondSplit = colorString.find(',', firstSplit + 1);
+Color string_to_color(const string &color_string) {
+	size_t first_split = color_string.find(',');
+	size_t second_split = color_string.find(',', first_split + 1);
 
-	string redString = colorString.substr(0, firstSplit + 1);
-	string greenString = colorString.substr(firstSplit + 1, secondSplit - firstSplit);
-	string blueString = colorString.substr(secondSplit + 1);
+	string red_string = color_string.substr(0, first_split + 1);
+	string green_string = color_string.substr(first_split + 1, second_split - first_split);
+	string blue_string = color_string.substr(second_split + 1);
 
-	uchar red = stoi(redString);
-	uchar green = stoi(greenString);
-	uchar blue = stoi(blueString);
-
+	uchar red = stoi(red_string);
+	uchar green = stoi(green_string);
+	uchar blue = stoi(blue_string);
 	return cv::Vec3b(blue, green, red);
 }
 
-double getColorDist(const Color &colorA, const Color &colorB)
-{
+double get_color_dist(const Color &color_a, const Color &color_b) {
 	double distance = 0.0;
 
-	double redDifference = (double)((int)(colorA[2]) - (int)(colorB[2]));
-	double greenDifference = (double)((int)(colorA[1]) - (int)(colorB[1]));
-	double blueDifference = (double)((int)(colorA[0]) - (int)(colorB[0]));
+	double red_difference = (double)((int)(color_a[2]) - (int)(color_b[2]));
+	double green_difference = (double)((int)(color_a[1]) - (int)(color_b[1]));
+	double blue_difference = (double)((int)(color_a[0]) - (int)(color_b[0]));
 
-	distance += pow(redDifference, 2);
-	distance += pow(greenDifference, 2);
-	distance += pow(blueDifference, 2);
-
+	distance += pow(red_difference, 2);
+	distance += pow(green_difference, 2);
+	distance += pow(blue_difference, 2);
 	return sqrt(distance);
 }

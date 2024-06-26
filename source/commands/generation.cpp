@@ -1,54 +1,45 @@
 #include "generation.hpp"
 #include "../data/palette.hpp"
-#include "../utils/image.hpp"
-#include "../utils/color.hpp"
-
-#include <string>
-
-#include <opencv2/opencv.hpp>
+#include <iostream>
 
 using namespace std;
 
-void generateImg(const Arguments &args)
-{
-	// 1. Initialize palette
-	Palette palette = loadPalette(args.profile);
+void generate_image(const Arguments &args) {
+	cout << "[Loading palette...]" << endl;
+	Palette palette = load_palette(args.profile);
 
-	// 2. Load source image
-	Image srcImg(args.generation.srcPath);
-	srcImg.containInSize(args.generation.srcSize);
-	
-	// 3. Initialize destination image
-	int dstHeight = args.generation.pixelSize * srcImg.getHeight();
-	int dstWidth = args.generation.pixelSize * srcImg.getWidth();
-	Image dstImg(dstWidth, dstHeight, args.generation.dstPath);
-	
-	// 4. Iterate over each pixel in source image
-	uint pixelsInserted = 0;
-	uint pixelCount = srcImg.getWidth() * srcImg.getHeight();
+	cout << "[Loading source image...]" << endl;
+	Image src_image(args.generation.src_path);
+	src_image.contain_in_size(args.generation.src_size);
 
-	for (uint srcY = 0; srcY < srcImg.getHeight(); srcY++)
-	{
-		for (uint srcX = 0; srcX < srcImg.getWidth(); srcX++)
-		{
-			cout << '\r' << pixelsInserted << '/' << pixelCount << " pixels inserted.";
+	cout << "[Initializing destination image...]" << endl;
+	uint dst_height = args.generation.pixel_size * src_image.get_height();
+	uint dst_width= args.generation.pixel_size * src_image.get_width();
+	Image dst_image(dst_width, dst_height, args.generation.dst_path);
 
-			Image pixelImg = paletteGetImg(palette, srcImg.at(srcX, srcY), args.generation.pixelSize);
-			for (uint pixelY = 0; pixelY < pixelImg.getHeight(); pixelY++)
-			{
-				for (uint pixelX = 0; pixelX < pixelImg.getWidth(); pixelX++)
-				{
-					uint dstX = srcX * pixelImg.getWidth() + pixelX;
-					uint dstY = srcY * pixelImg.getHeight() + pixelY;
-					dstImg.at(dstX, dstY) = pixelImg.at(pixelX, pixelY);
+	cout << "[Inserting pixel images...]" << endl;
+	uint pixels_inserted = 0;
+	uint pixel_count = src_image.get_width() * src_image.get_height();
+	for (uint src_y = 0; src_y < src_image.get_height(); src_y++) {
+		for (uint src_x = 0; src_x < src_image.get_width(); src_x++) {
+			cout << '\r' << pixels_inserted << '/' << pixel_count << " pixels inserted.";
+
+			Color pixel_color = src_image.at(src_x, src_y);
+			Image pixel_image = palette_get_img(palette, pixel_color, args.generation.pixel_size);
+
+			for (uint pixel_y = 0; pixel_y < pixel_image.get_height(); pixel_y++) {
+				for (uint pixel_x = 0; pixel_x < pixel_image.get_width(); pixel_x++) {
+					uint dst_x = src_x * pixel_image.get_width() + pixel_x;
+					uint dst_y = src_y * pixel_image.get_height() + pixel_y;
+					dst_image.at(dst_x, dst_y) = pixel_image.at(pixel_x, pixel_y);
 				}
 			}
 
-			pixelsInserted++;
+			pixels_inserted++;
 		}
 	}
-	cout << '\r' << pixelCount << '/' << pixelCount << " pixels inserted.";
+	cout << '\r' << pixels_inserted << '/' << pixel_count << " pixels inserted." << endl;
 
-	// 5. Save destination image
-	dstImg.save();
+	cout << "[Saving destination image...]" << endl;
+	dst_image.save();
 }

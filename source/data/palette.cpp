@@ -1,5 +1,4 @@
 #include "palette.hpp"
-#include "../utils/color.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -17,86 +16,78 @@ using json = nlohmann::json;
 
 constexpr auto TAB = "   ";
 
-static fs::path getPalettePath(string profile)
-{
-	PWSTR localPath = NULL;
-	HRESULT hres = SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &localPath);
+static fs::path get_palette_path(const string profile) {
+	PWSTR local_path = NULL;
+	HRESULT hres = SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &local_path);
 
-	fs::path palettePath = localPath;
-	palettePath /= "Parslie";
-	palettePath /= "img2mosaic (cpp)";
-	palettePath /= profile;
-	palettePath /= "palette.json";
-
-	return palettePath;
+	fs::path palette_path = local_path;
+	palette_path /= "Parslie";
+	palette_path /= "img2mosaic (cpp)";
+	palette_path /= profile;
+	palette_path /= "palette.json";
+	return palette_path;
 }
 
-Palette loadPalette(string profile)
-{
-	fs::path palettePath = getPalettePath(profile);
+Palette load_palette(const string profile) {
+	fs::path palette_path = get_palette_path(profile);
+	fs::create_directories(palette_path.parent_path());
 	Palette palette;
 
-	fs::create_directories(palettePath.parent_path());
+	if (fs::exists(palette_path)) {
+		ifstream file(palette_path);
+		json data = json::parse(file); // TODO: handle corruption
 
-	ifstream file(palettePath);
-	json data = json::parse(file); // TODO: handle curruption
+		for (auto iter = data.begin(); iter != data.end(); iter++) {
+			string color_string = iter.key();
+			json sections_json = iter.value();
+			vector<ImageSection> img_sections;
 
-	for (auto iter = data.begin(); iter != data.end(); iter++)
-	{
-		string colorString = iter.key();
-		json imgSectionsJson = iter.value();
-		vector<ImageSection> imgSections;
+			for (auto section_iter = sections_json.begin(); section_iter != sections_json.end(); section_iter++) {
+				json section_json = *section_iter;
+				img_sections.push_back({
+					section_json["path"],
+					section_json["x"],
+					section_json["y"],
+					section_json["width"],
+					section_json["height"],
+				});
+			}
 
-		for (auto imgSectionsIter = imgSectionsJson.begin(); imgSectionsIter != imgSectionsJson.end(); imgSectionsIter++)
-		{
-			json imgSectionJson = *imgSectionsIter;
-			imgSections.push_back({
-				imgSectionJson["path"],
-				imgSectionJson["x"],
-				imgSectionJson["y"],
-				imgSectionJson["width"],
-				imgSectionJson["height"],
-			});
+			palette[color_string] = img_sections;
 		}
-
-		palette[colorString] = imgSections;
 	}
 
 	return palette;
 }
 
-void savePalette(string profile, const Palette &palette)
-{
-	fs::path palettePath = getPalettePath(profile);
+void save_palette(const string profile, const Palette &palette) {
+	fs::path palette_path = get_palette_path(profile);
 
 	json data = json::object();
-	for (auto &[colorString, imgSections] : palette)
-	{
-		json imgsJson = json::array();
-		for (auto &imgSection : imgSections)
-			imgsJson.push_back(imgSection.toJson());
-		data[colorString] = imgsJson;
+	for (auto &[color_string, img_sections] : palette) {
+		json imgs_json = json::array();
+		for (auto &img_section : img_sections)
+			imgs_json.push_back(img_section.to_json());
+		data[color_string] = imgs_json;
 	}
 
-	ofstream file(palettePath);
+	ofstream file(palette_path);
 	file << data << endl;
 }
 
-void printPalette(const Palette &palette)
-{
+void print_palette(const Palette &palette) {
 	cout << "{\n";
-	for (auto iter = palette.begin(); iter != palette.end(); iter++)
-	{
-		string colorString = (*iter).first;
-		vector<ImageSection> imgSections = (*iter).second;
+	for (auto iter = palette.begin(); iter != palette.end(); iter++) {
+		string color_string = (*iter).first;
+		vector<ImageSection> img_sections = (*iter).second;
 
-		cout << TAB << "\"" << colorString << "\": [";
-		for (auto imgSectionsIter = imgSections.begin(); imgSectionsIter != imgSections.end(); imgSectionsIter++)
+		cout << TAB << "\"" << color_string << "\": [";
+		for (auto sections_iter = img_sections.begin(); sections_iter != img_sections.end(); sections_iter++)
 		{
-			ImageSection imgSection = *imgSectionsIter;
+			ImageSection img_section = *sections_iter;
 
-			cout << "\"" << imgSection.path.string() << "\""; // TODO: print whole image section?
-			if (imgSectionsIter + 1 != imgSections.end())
+			cout << "\"" << img_section.path.string() << "\""; // TODO: print whole image section?
+			if (sections_iter + 1 != img_sections.end())
 				cout << ", ";
 		}
 		cout << TAB << "]\n,";
@@ -104,64 +95,55 @@ void printPalette(const Palette &palette)
 	cout << "}" << endl;
 }
 
-bool paletteContains(const Palette &palette, const string targetPath)
-{
-	for (auto &[_, imgSections] : palette)
-		for (auto &imgSection : imgSections)
-			if (imgSection.path == targetPath)
+bool palette_contains(const Palette &palette, const string target_path) {
+	for (auto &[_, img_sections] : palette)
+		for (auto &img_section : img_sections)
+			if (img_section.path == target_path)
 				return true;
-
 	return false;
 }
 
-void paletteAddImgSection(Palette &palette, const Color &color, const ImageSection &imgSection)
-{
-	string colorString = colorToString(color);
+void palette_add_img_section(Palette &palette, const Color &color, const ImageSection &img_section) {
+	string color_string = color_to_string(color);
 
-	vector<ImageSection> imgSections;
-	if (palette.find(colorString) != palette.end())
-		imgSections = palette.at(colorString);
+	vector<ImageSection> img_sections;
+	if (palette.find(color_string) != palette.end())
+		img_sections = palette.at(color_string);
 
-	imgSections.push_back(imgSection);
-	palette[colorString] = imgSections;
+	img_sections.push_back(img_section);
+	palette[color_string] = img_sections;
 }
 
-static Color getNearestColor(Palette &palette, const Color &targetColor)
+static Color get_nearest_color(Palette &palette, const Color &target_color)
 {
-	Color nearestColor;
-	double nearestDist = 442.0; // Just above max possible distance
+	Color nearest_color;
+	double nearest_dist = 442.0; // Just above max possible distance
 
-	for (auto &[key, _] : palette)
-	{
-		Color color = stringToColor(key);
-		double dist = getColorDist(color, targetColor);
+	for (auto &[key, _] : palette) {
+		Color color = string_to_color(key);
+		double dist = get_color_dist(color, target_color);
 
-		if (dist < nearestDist)
-		{
-			nearestColor = color;
-			nearestDist = dist;
+		if (dist < nearest_dist) {
+			nearest_color = color;
+			nearest_dist = dist;
 		}
 	}
 
-	return nearestColor;
+	return nearest_color;
 }
 
-Image paletteGetImg(Palette &palette, const Color &color, uint size)
-{
-	string colorString = colorToString(color);
-	vector<ImageSection> imgSections;
-	
-	if (palette.contains(colorString))
-	{
-		imgSections = palette[colorString];
-	}
-	else
-	{
-		string nearColorString = colorToString(getNearestColor(palette, color));
-		imgSections = palette[nearColorString];
+Image palette_get_img(Palette &palette, const Color &color, unsigned int size) {
+	string color_string = color_to_string(color);
+	vector<ImageSection> img_sections;
+
+	if (palette.contains(color_string)) {
+		img_sections = palette[color_string];
+	} else {
+		string nearColorString = color_to_string(get_nearest_color(palette, color));
+		img_sections = palette[nearColorString];
 	}
 
-	int index = (int)round((double)rand() / RAND_MAX * (imgSections.size() - 1));
-	ImageSection imgSection = imgSections[index];
-	return imgSection.toImage(size);
+	int index = (int)round((double)rand() / RAND_MAX * (img_sections.size() - 1));
+	ImageSection imgSection = img_sections[index];
+	return imgSection.to_image(size);
 }

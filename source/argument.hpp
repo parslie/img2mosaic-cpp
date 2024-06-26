@@ -2,31 +2,30 @@
 
 #include <string>
 
-struct GenerationArgs
-{
+struct GenerationArgs {
 	bool parsed = false;
-	std::string srcPath = "";
-	std::string dstPath = "";
-	unsigned int srcSize = 128;
-	unsigned int pixelSize = 16;
+
+	std::string src_path = "";
+	std::string dst_path = "";
+	unsigned int src_size = 128;
+	unsigned int pixel_size = 16;
 };
 
-struct AnalysisArgs
-{
+struct AnalysisArgs {
 	bool parsed = false;
-	std::string dirPath = "";
+
+	std::string dir_path = "";
 	bool recursive = false;
 };
 
-struct Arguments
-{
-	std::string profile = "default";
-	bool debug = false;
-
+struct Arguments {
 	GenerationArgs generation;
 	AnalysisArgs analysis;
 
-	std::string toString();
+	std::string profile = "default";
+	bool debug = false;
+
+	std::string to_string() const;
 };
 
-Arguments parseArgs(int argc, const char* const *argv);
+Arguments parse_argv(int argc, const char *const *argv);

@@ -9,10 +9,10 @@
 
 typedef std::map<std::string, std::vector<ImageSection>> Palette;
 
-Palette loadPalette(const std::string profile);
-void savePalette(const std::string profile, const Palette &palette);
-void printPalette(const Palette &palette);
+Palette load_palette(const std::string profile);
+void save_palette(const std::string profile, const Palette &palette);
+void print_palette(const Palette &palette);
 
-bool paletteContains(const Palette &palette, const std::string targetPath);
-void paletteAddImgSection(Palette &palette, const Color &color, const ImageSection &imgSection);
-Image paletteGetImg(Palette &palette, const Color &color, uint size);
+bool palette_contains(const Palette &palette, const std::string target_path);
+void palette_add_img_section(Palette &palette, const Color &color, const ImageSection &img_section);
+Image palette_get_img(Palette &palette, const Color &color, unsigned int size);

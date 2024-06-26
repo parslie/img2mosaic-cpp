@@ -2,6 +2,4 @@
 
 #include "../argument.hpp"
 
-#include <string>
-
-void analyzeImgs(const Arguments &args);
+void analyze_images(const Arguments &args);

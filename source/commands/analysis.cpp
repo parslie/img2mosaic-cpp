@@ -1,19 +1,11 @@
 #include "analysis.hpp"
 #include "../data/palette.hpp"
-#include "../utils/image.hpp"
-
-#include <array>
 #include <iostream>
-#include <filesystem>
-#include <vector>
-
-#include <opencv2/opencv.hpp>
 
 using namespace std;
 namespace fs = filesystem;
 
-static bool isImgFile(const fs::path path)
-{
+static bool is_img_file(const fs::path path) {
 	string EXTS[] = { ".png", ".jpg", ".jpeg", ".webp" };
 	for (string ext : EXTS)
 		if (ext == path.extension())
@@ -21,58 +13,65 @@ static bool isImgFile(const fs::path path)
 	return false;
 }
 
-static vector<fs::path> getUnanalyzedPaths(const string dirPath, const bool recursive, const Palette &palette)
-{
+static vector<fs::path> get_unanalyzed_paths(const string dir_path, const bool recursive, const Palette &palette) {
 	vector<fs::path> paths;
 
-	if (recursive)
-	{
-		for (auto &entry : fs::recursive_directory_iterator(dirPath))
-			if (isImgFile(entry.path()) && !paletteContains(palette, entry.path().string()))
-				paths.push_back(entry.path());
-	}
-	else
-	{
-		for (auto &entry : fs::directory_iterator(dirPath))
-			if (isImgFile(entry.path()) && !paletteContains(palette, entry.path().string()))
-				paths.push_back(entry.path());
+	// TODO: better error-handling?
+	if (recursive) {
+		for (auto &entry : fs::recursive_directory_iterator(dir_path)) {
+			try {
+				if (is_img_file(entry.path()) && !palette_contains(palette, entry.path().string()))
+					paths.push_back(entry.path());
+			} catch (...) {
+				cout << "An error occurred when getting a path." << endl;
+			}
+		}
+	} else {
+		for (auto &entry : fs::directory_iterator(dir_path)) {
+			try {
+				if (is_img_file(entry.path()) && !palette_contains(palette, entry.path().string()))
+					paths.push_back(entry.path());
+			} catch (...) {
+				cout << "An error occurred when getting a path." << endl;
+			}
+		}
 	}
 
 	return paths;
 }
 
-void analyzeImgs(const Arguments &args)
-{
-	// 1. Initialize palette
-	Palette palette = loadPalette(args.profile);
+void analyze_images(const Arguments &args) {
+	cout << "[Loading palette...]" << endl;
+	Palette palette = load_palette(args.profile);
 
-	// 2. Get paths that haven't been analyzed
-	cout << "Getting unanalyzed images." << endl;
-	vector<fs::path> paths = getUnanalyzedPaths(args.analysis.dirPath, args.analysis.recursive, palette);
-	cout << "Got " << paths.size() << " unanalyzed images." << endl;
+	cout << "[Getting unanalyzed images...]" << endl;
+	vector<fs::path> paths = get_unanalyzed_paths(args.analysis.dir_path, args.analysis.recursive, palette);
 
-	// 3. Iterate over each path
-	int newImgSections = 0;
-	int pathsAnalyzed = 0;
-	for (fs::path path : paths)
-	{
-		Image img(path);
-		vector<ImageSection> imgSections = img.split();
+	cout << "[Analyzing " << paths.size() << " images...]" << endl;
+	uint new_img_sections = 0;
+	uint paths_analyzed = 0;
+	try {
+		for (fs::path path : paths) {
+			Image image(path);
+			vector<ImageSection> image_sections = image.split();
 
-		for (ImageSection imgSection : imgSections)
-		{
-			Image sectionImg = imgSection.toImage(16);
-			Color averageColor = sectionImg.averageColor();
-			paletteAddImgSection(palette, averageColor, imgSection);
-			newImgSections += 1;
+			for (ImageSection image_section : image_sections) {
+				Image section_image = image_section.to_image(16);
+				Color average_color = section_image.average_color();
+				palette_add_img_section(palette, average_color, image_section);
+				new_img_sections++;
+			}
+
+			paths_analyzed++;
+			cout << "\r" << paths_analyzed << "/" << paths.size() << " images analyzed.";
 		}
-
-		pathsAnalyzed += 1;
-		cout << '\r' << pathsAnalyzed << "/" << paths.size() << " images analyzed.";
+	} catch (...) {
+		// TODO: better error handling
+		cout << "An error occurred!" << endl;
 	}
-	cout << "\nAdded " << newImgSections << " new image sections to the palette." << endl;
+	cout << "\nAdded " << new_img_sections << " image sections to the palette!" << endl;
 
-	// 4. Save palette
-	savePalette(args.profile, palette);
-	cout << "Saved palette." << endl;
+	cout << "[Saving palette...]" << endl;
+	save_palette(args.profile, palette);
+	cout << "Saved palette!" << endl; // TODO: maybe add whereto
 }

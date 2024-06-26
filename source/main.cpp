@@ -1,15 +1,23 @@
-﻿#include "argument.hpp"
+#include "argument.hpp"
 #include "commands/generation.hpp"
 #include "commands/analysis.hpp"
+#include <cstdlib>
 
-int main(int argc, char **argv)
-{
-	Arguments args = parseArgs(argc, argv);
+using namespace std;
+
+int main(int argc, char **argv) {
+	Arguments args = parse_argv(argc, argv);
+	/*
+	Arguments args;
+	args.profile = "testing";
+	args.analysis.parsed = true;
+	args.analysis.dir_path = "E:\\_Gammalt\\Pictures\\Saved Pictures";
+	*/
 
 	if (args.generation.parsed)
-		generateImg(args);
+		generate_image(args);
 	else if (args.analysis.parsed)
-		analyzeImgs(args);
+		analyze_images(args);
 
-	return 0;
+	return EXIT_SUCCESS;
 }

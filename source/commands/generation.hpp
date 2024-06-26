@@ -2,6 +2,4 @@
 
 #include "../argument.hpp"
 
-#include <string>
-
-void generateImg(const Arguments &args);
+void generate_image(const Arguments &args);
