@@ -1,5 +1,6 @@
 #include "commands.hpp"
 
+#include "../data/image.hpp"
 #include "../data/palette.hpp"
 #include "../utils/progress.hpp"
 
@@ -59,6 +60,14 @@ static std::vector<fs::path> get_paths(const fs::path dir_path, const bool recur
 
 static void analyze_path(Palette &palette, fs::path path, unsigned int density, unsigned int color)
 {
+    Image image{ path };
+
+    std::vector<ImageSection> sections{ image.split() };
+    for (ImageSection section : sections)
+    {
+        Image section_image{ section.to_image(512) };
+        section_image.show("section image");
+    }
 }
 
 int analyze(const Arguments &args)
