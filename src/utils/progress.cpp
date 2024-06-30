@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-Progress::Progress(unsigned int total) : m_current{ 0 }, m_total{ total }
+Progress::Progress(size_t total) : m_current{ 0 }, m_total{ total }
 {
 }
 
@@ -23,11 +23,11 @@ std::string Progress::to_string() const
         ss << '=';
     for (unsigned int i{ 0 }; i < empty_cells; i++)
         ss << ' ';
-    ss << "] " << percentage << "% | " << m_current << "/" << m_total;
+    ss << "] " << static_cast<int>(percentage) << "% | " << m_current << "/" << m_total;
     return ss.str();
 }
 
-void Progress::increment(unsigned int value)
+void Progress::increment(size_t value)
 {
     if (m_current + value > m_total)
         m_current = m_total;
@@ -35,7 +35,7 @@ void Progress::increment(unsigned int value)
         m_current += value;
 }
 
-unsigned int Progress::total() const
+size_t Progress::total() const
 {
     return m_total;
 }

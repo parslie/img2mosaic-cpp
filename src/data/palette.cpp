@@ -65,6 +65,11 @@ double Palette::color_coverage() const
     return static_cast<double>(m_image_sections.size()) / max_possible_color_count;
 }
 
+fs::path Palette::path() const
+{
+    return m_path;
+}
+
 std::string Palette::to_string() const
 {
     unsigned int section_count{ 0 };

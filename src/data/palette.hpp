@@ -19,6 +19,7 @@ public:
     Palette(std::string profile, unsigned int density, unsigned int color);
     void save();
     double color_coverage() const;
+    std::filesystem::path path() const;
     std::string to_string() const;
     nlohmann::json to_json() const;
 };
