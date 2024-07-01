@@ -59,11 +59,14 @@ void Palette::save()
     file << palette_json.dump(3) << std::endl;
 }
 
+/*
 double Palette::color_coverage() const
 {
+    // TODO: figure out how to handle large numbers
     unsigned int max_possible_color_count{ 256 * 256 * 256 / m_color };
     return static_cast<double>(m_image_sections.size()) / max_possible_color_count;
 }
+*/
 
 fs::path Palette::path() const
 {
@@ -74,13 +77,14 @@ std::string Palette::to_string() const
 {
     unsigned int section_count{ 0 };
     unsigned int color_count{ static_cast<unsigned int>(m_image_sections.size())};
-    double color_coverage{ this->color_coverage() };
+    //double color_coverage{ this->color_coverage() };
 
     for (auto &[color_str, sections] : m_image_sections)
         section_count += static_cast<unsigned int>(sections.size());
 
     std::stringstream ss{};
-    ss << "Palette( colors = " << color_count << ", image_sections = " << section_count << ", color_coverage = " << color_coverage << "% )";
+    //ss << "Palette( colors = " << color_count << ", image_sections = " << section_count << ", color_coverage = " << color_coverage << "% )";
+    ss << "Palette( colors = " << color_count << ", image_sections = " << section_count << " )";
     return ss.str();
 }
 

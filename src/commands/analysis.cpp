@@ -2,14 +2,19 @@
 
 #include "../data/image.hpp"
 #include "../data/palette.hpp"
+#include "../utils/color.hpp"
 #include "../utils/progress.hpp"
 
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
 #include <string>
+#include <vector>
+
+#include "nlohmann/json.hpp"
 
 namespace fs = std::filesystem;
+using json = nlohmann::json;
 
 static bool is_img_file(const fs::path path)
 {
@@ -65,8 +70,12 @@ static void analyze_path(Palette &palette, fs::path path, unsigned int density, 
     std::vector<ImageSection> sections{ image.split() };
     for (ImageSection section : sections)
     {
-        Image section_image{ section.to_image(512) };
-        section_image.show("section image");
+        Image section_image{ section.to_image() };
+        json section_json{ section.to_json() };
+        std::vector<Color> average_colors{ section_image.average_colors(density, color) };
+        std::string colors_str{ colors_to_string(average_colors) };
+        std::cout << colors_str << '\n' << std::endl;
+        section_image.show("asd");
     }
 }
 

@@ -75,6 +75,48 @@ unsigned int Image::height() const
     return m_height;
 }
 
+std::vector<Color> Image::average_colors(unsigned int density, unsigned int color) const
+{
+    constexpr unsigned int SIZE_PER_DENSITY = 5;
+
+    std::vector<Color> colors{};
+    cv::Mat resized_mat{};
+    cv::Size new_size{ static_cast<int>(SIZE_PER_DENSITY * density), static_cast<int>(SIZE_PER_DENSITY * density) };
+    cv::resize(m_mat, resized_mat, new_size);
+
+    for (unsigned int density_y{ 0 }; density_y < density; ++density_y)
+    {
+        for (unsigned int density_x{ 0 }; density_x < density; ++density_x)
+        {
+            double total_blue{ 0.0 }, total_green{ 0.0 }, total_red{ 0.0 };
+            unsigned int color_count = SIZE_PER_DENSITY * SIZE_PER_DENSITY;
+
+            for (unsigned int local_y{ 0 }; local_y < SIZE_PER_DENSITY; ++local_y)
+            {
+                for (unsigned int local_x{ 0 }; local_x < SIZE_PER_DENSITY; ++local_x)
+                {
+                    unsigned global_y{ local_y + density_y * SIZE_PER_DENSITY };
+                    unsigned global_x{ local_x + density_x * SIZE_PER_DENSITY };
+                    Color color = resized_mat.at<Color>(global_y, global_x);
+                    total_blue += color[0];
+                    total_green += color[1];
+                    total_red += color[2];
+                }
+            }
+
+            unsigned char average_blue = static_cast<unsigned char>(total_blue / color_count);
+            unsigned char average_green = static_cast<unsigned char>(total_green / color_count);
+            unsigned char average_red = static_cast<unsigned char>(total_red / color_count);
+            average_blue -= average_blue % color;
+            average_green -= average_green % color;
+            average_red -= average_red % color;
+            colors.push_back(Color(average_blue, average_green, average_red));
+        }
+    }
+
+    return colors;
+}
+
 void Image::show(cv::String win_name) const
 {
     cv::imshow(win_name, m_mat);

@@ -7,9 +7,9 @@
 
 int main(int argc, char **argv)
 {
-    const char *debug_argv[4]{ argv[0], "saved_pics", "analyze", "E:\\_Gammalt\\Pictures\\Saved Pictures" };
+    const char *debug_argv[8]{ argv[0], "-d", "2", "-c", "2", "saved_pics", "analyze", "E:\\Pictures\\Saved Pictures"};
     char **debug_argv2 = const_cast<char **>(debug_argv);
-    const Arguments args{ 4, debug_argv2 };
+    const Arguments args{ 8, debug_argv2 };
 
     if (args.generation_args.parsed)
         return generate(args);

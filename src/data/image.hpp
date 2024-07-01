@@ -1,11 +1,11 @@
 #pragma once
 
+#include "../utils/color.hpp"
+
 #include <filesystem>
 
 #include "opencv2/opencv.hpp"
 #include "nlohmann/json.hpp"
-
-typedef cv::Vec3b Color;
 
 class Image;
 
@@ -38,6 +38,7 @@ public:
 
     unsigned int width() const;
     unsigned int height() const;
+    std::vector<Color> average_colors(unsigned int density, unsigned int color) const;
     void show(cv::String win_name) const;
     std::vector<ImageSection> split() const;
 };
