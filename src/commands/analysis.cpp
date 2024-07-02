@@ -1,5 +1,7 @@
 #include "commands.hpp"
 
+#include "../data/image.hpp"
+
 #include <filesystem>
 #include <iostream>
 
@@ -56,6 +58,16 @@ int analyze(const Arguments &args)
     std::cout << "[Initializing analysis...]" << '\n';
     const std::vector<fs::path> img_paths{ get_img_paths(args.analysis_args.dir_path, args.analysis_args.recurse) };
     std::cout << TAB << "Loaded image paths." << '\n';
+
+    for (auto &img_path : img_paths)
+    {
+        Image img{ img_path };
+        img.show("unscaled");
+        img.scale_to_cover(256);
+        img.show("scaled to cover");
+        img.scale_to_fit(256);
+        img.show("scaled to fit");
+    }
 
     return EXIT_SUCCESS;
 }
