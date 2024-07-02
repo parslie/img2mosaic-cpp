@@ -1,8 +1,10 @@
 #include "image.hpp"
 
+namespace fs = std::filesystem;
+
 // Constructors
 
-Image::Image(const std::filesystem::path &path) : m_path{ path }
+Image::Image(const fs::path &path) : m_path{ path }
 {
     m_mat = cv::imread(path.string(), cv::IMREAD_COLOR);
     m_width = static_cast<unsigned int>(m_mat.cols);
@@ -53,11 +55,31 @@ void Image::scale_to_fit(unsigned int size, unsigned int divisor)
     this->scale(factor, divisor);
 }
 
+ColorBGR &Image::at(unsigned int x, unsigned int y)
+{
+    return m_mat.at<ColorBGR>(static_cast<int>(x), static_cast<int>(y));
+}
+
 // Public const functions
+
+unsigned int Image::width() const
+{
+    return m_width;
+}
+
+unsigned int Image::height() const
+{
+    return m_height;
+}
 
 void Image::show(const std::string &window_name) const
 {
     cv::imshow(window_name, m_mat);
     cv::waitKey(0);
     cv::destroyAllWindows();
+}
+
+void Image::save() const
+{
+    cv::imwrite(m_path.string(), m_mat);
 }

@@ -62,11 +62,8 @@ int analyze(const Arguments &args)
     for (auto &img_path : img_paths)
     {
         Image img{ img_path };
-        img.show("unscaled");
-        img.scale_to_cover(256);
-        img.show("scaled to cover");
-        img.scale_to_fit(256);
-        img.show("scaled to fit");
+        img.save();
+        exit(0);
     }
 
     return EXIT_SUCCESS;

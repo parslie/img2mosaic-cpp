@@ -4,6 +4,8 @@
 
 #include "opencv2/opencv.hpp"
 
+typedef cv::Vec3b ColorBGR;
+
 class Image
 {
     cv::Mat m_mat;
@@ -16,6 +18,10 @@ public:
     void scale(double factor, unsigned int divisor = 0);
     void scale_to_cover(unsigned int size, unsigned int divisor = 0);
     void scale_to_fit(unsigned int size, unsigned int divisor = 0);
+    ColorBGR &at(unsigned int x, unsigned int y);
 
+    unsigned int width() const;
+    unsigned int height() const;
     void show(const std::string &window_name) const;
+    void save() const;
 };
