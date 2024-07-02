@@ -59,10 +59,14 @@ int analyze(const Arguments &args)
     const std::vector<fs::path> img_paths{ get_img_paths(args.analysis_args.dir_path, args.analysis_args.recurse) };
     std::cout << TAB << "Loaded image paths." << '\n';
 
-    for (auto &img_path : img_paths)
+    for (const fs::path &img_path : img_paths)
     {
         Image img{ img_path };
-        std::cout << TAB << "avg color: " << img.average_color() << '\n';
+        for (ImageSection img_section : img.split())
+        {
+            Image section_img{ img_section.to_image(512) };
+            section_img.show("section");
+        }
     }
 
     return EXIT_SUCCESS;
