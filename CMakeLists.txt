@@ -15,7 +15,7 @@ set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems
 project ("img2mosaic")
 
 # Add source to this project's executable.
-add_executable (img2mosaic "source/main.cpp" "source/argument.cpp" "source/commands/analysis.cpp" "source/commands/generation.cpp" "source/data/palette.cpp" "source/utils/color.cpp" "source/utils/image.cpp" "source/utils/image_section.cpp")
+add_executable (img2mosaic "src/main.cpp" "src/arguments.cpp" "src/commands/analysis.cpp" "src/commands/generation.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET img2mosaic PROPERTY CXX_STANDARD 20)
