@@ -62,8 +62,7 @@ int analyze(const Arguments &args)
     for (auto &img_path : img_paths)
     {
         Image img{ img_path };
-        img.save();
-        exit(0);
+        std::cout << TAB << "avg color: " << img.average_color() << '\n';
     }
 
     return EXIT_SUCCESS;

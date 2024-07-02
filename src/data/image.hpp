@@ -20,6 +20,7 @@ public:
     void scale_to_fit(unsigned int size, unsigned int divisor = 0);
     ColorBGR &at(unsigned int x, unsigned int y);
 
+    ColorBGR average_color() const;
     unsigned int width() const;
     unsigned int height() const;
     void show(const std::string &window_name) const;

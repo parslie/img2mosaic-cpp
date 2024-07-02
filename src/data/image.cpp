@@ -62,6 +62,28 @@ ColorBGR &Image::at(unsigned int x, unsigned int y)
 
 // Public const functions
 
+ColorBGR Image::average_color() const
+{
+    double total_blue{ 0 }, total_green{ 0 }, total_red{ 0 };
+    unsigned int color_count{ m_width * m_height };
+
+    for (unsigned int y{ 0 }; y < m_height; ++y)
+    {
+        for (unsigned int x{ 0 }; x < m_width; ++x)
+        {
+            ColorBGR color = m_mat.at<ColorBGR>(y, x);
+            total_blue += color[0];
+            total_green += color[1];
+            total_red += color[2];
+        }
+    }
+
+    unsigned char average_blue = static_cast<unsigned char>(total_blue / color_count);
+    unsigned char average_green = static_cast<unsigned char>(total_green / color_count);
+    unsigned char average_red = static_cast<unsigned char>(total_red / color_count);
+    return ColorBGR(average_blue, average_green, average_red);
+}
+
 unsigned int Image::width() const
 {
     return m_width;
