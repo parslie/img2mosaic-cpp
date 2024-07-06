@@ -3,6 +3,7 @@
 #include "../data/image.hpp"
 #include "../data/palette.hpp"
 #include "../utils/color.hpp"
+#include "../utils/progress.hpp"
 
 #include <filesystem>
 #include <iostream>
@@ -63,8 +64,11 @@ int analyze(const Arguments &args)
     const std::vector<fs::path> img_paths{ get_img_paths(args.analysis_args.dir_path, args.analysis_args.recurse) };
     std::cout << TAB << "Loaded image paths." << '\n';
 
+    Progress progress{ img_paths.size() };
     for (const fs::path &img_path : img_paths)
     {
+        std::cout << TAB << progress.to_string() << '\r';
+
         Image img{ img_path };
         for (ImageSection img_section : img.split())
         {
@@ -72,7 +76,9 @@ int analyze(const Arguments &args)
             ColorBGR average_color{ section_img.average_color() };
             palette.insert(average_color, img_section);
         }
+        progress.increment();
     }
+    std::cout << TAB << progress.to_string() << '\n';
 
     std::cout << "[Saving palette...]" << '\n';
     palette.save();
