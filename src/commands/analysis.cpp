@@ -1,6 +1,8 @@
 #include "commands.hpp"
 
 #include "../data/image.hpp"
+#include "../data/palette.hpp"
+#include "../utils/color.hpp"
 
 #include <filesystem>
 #include <iostream>
@@ -56,6 +58,8 @@ int analyze(const Arguments &args)
     constexpr const char *TAB{ "   " };
 
     std::cout << "[Initializing analysis...]" << '\n';
+    Palette palette{ args.profile };
+    std::cout << TAB << "Loaded palette." << '\n';
     const std::vector<fs::path> img_paths{ get_img_paths(args.analysis_args.dir_path, args.analysis_args.recurse) };
     std::cout << TAB << "Loaded image paths." << '\n';
 
@@ -65,9 +69,14 @@ int analyze(const Arguments &args)
         for (ImageSection img_section : img.split())
         {
             Image section_img{ img_section.to_image(512) };
-            section_img.show("section");
+            ColorBGR average_color{ section_img.average_color() };
+            palette.insert(average_color, img_section);
         }
     }
+
+    std::cout << "[Saving palette...]" << '\n';
+    palette.save();
+    std::cout << TAB << "Saved palette." << '\n';
 
     return EXIT_SUCCESS;
 }

@@ -2,6 +2,7 @@
 
 #include <filesystem>
 
+#include "nlohmann/json.hpp"
 #include "opencv2/opencv.hpp"
 
 typedef cv::Vec3b ColorBGR;
@@ -15,6 +16,7 @@ struct ImageSection
     unsigned int width, height;
 
     Image to_image(unsigned int size = 0) const;
+    nlohmann::json to_json() const;
 };
 
 class Image

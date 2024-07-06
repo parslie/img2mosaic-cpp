@@ -1,6 +1,7 @@
 #include "image.hpp"
 
 namespace fs = std::filesystem;
+using json = nlohmann::json;
 
 Image ImageSection::to_image(unsigned int size) const
 {
@@ -33,4 +34,15 @@ Image ImageSection::to_image(unsigned int size) const
 	if (size != 0)
 		section_img.scale_to_cover(size);
 	return section_img;
+}
+
+json ImageSection::to_json() const
+{
+	json object{ json::object() };
+	object["img_path"] = img_path;
+	object["x"] = x;
+	object["y"] = y;
+	object["width"] = width;
+	object["height"] = height;
+	return object;
 }
