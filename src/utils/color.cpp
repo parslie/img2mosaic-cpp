@@ -15,10 +15,10 @@ std::string color_to_str(const ColorBGR &color)
 ColorBGR str_to_color(std::string_view str)
 {
     size_t first_delim{ str.find(CHANNEL_DELIMITER) };
-    size_t second_delim{ str.find(CHANNEL_DELIMITER, first_delim) };
+    size_t second_delim{ str.find(CHANNEL_DELIMITER, first_delim + 1) };
 
     std::string red_str{ str.substr(0, first_delim) };
-    std::string green_str{ str.substr(first_delim + 1, second_delim) };
+    std::string green_str{ str.substr(first_delim + 1, second_delim - first_delim - 1) };
     std::string blue_str{ str.substr(second_delim + 1) };
 
     uchar red{ static_cast<uchar>(std::stoi(red_str)) };
