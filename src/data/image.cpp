@@ -73,6 +73,7 @@ std::vector<ImageSection> Image::split() const
     if (m_width == m_height)
     {
         ImageSection section{
+            0,
             m_path,
             0,
             0,
@@ -106,6 +107,7 @@ std::vector<ImageSection> Image::split() const
         unsigned int x{ static_cast<unsigned int>(delta_x * i) };
         unsigned int y{ static_cast<unsigned int>(delta_y * i) };
         sections.push_back({
+            i,
             m_path,
             x,
             y,

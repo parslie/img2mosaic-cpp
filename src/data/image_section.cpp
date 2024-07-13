@@ -3,12 +3,14 @@
 namespace fs = std::filesystem;
 using json = nlohmann::json;
 
-Image ImageSection::to_image(unsigned int size) const
+Image ImageSection::to_image(std::shared_ptr<ImageLoader> img_loader, unsigned int size) const
 {
-	Image full_img{ img_path };
+	Image full_img{ (img_loader != nullptr) ? img_loader->load(img_path) : img_path };
 
 	fs::path section_path = img_path.stem();
 	section_path += "_section";
+	section_path += "_";
+	section_path += std::to_string(id);
 	section_path += "_";
 	section_path += std::to_string(x);
 	section_path += "x";
@@ -39,10 +41,21 @@ Image ImageSection::to_image(unsigned int size) const
 json ImageSection::to_json() const
 {
 	json object{ json::object() };
+	object["id"] = id;
 	object["img_path"] = img_path;
 	object["x"] = x;
 	object["y"] = y;
 	object["width"] = width;
 	object["height"] = height;
 	return object;
+}
+
+bool ImageSection::equals_loose(const ImageSection &other) const
+{
+	return other.id == id && other.img_path == img_path;
+}
+
+bool ImageSection::equals_exact(const ImageSection &other) const
+{
+	return other.id == id && other.img_path == img_path && other.x == x && other.y == y && other.width == width && other.height == height;
 }
