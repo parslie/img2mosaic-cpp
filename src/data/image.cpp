@@ -65,6 +65,22 @@ ColorBGR &Image::at(unsigned int x, unsigned int y)
     return m_mat.at<ColorBGR>(static_cast<int>(y), static_cast<int>(x));
 }
 
+void Image::insert(unsigned int min_x, unsigned int min_y, Image &other)
+{
+    unsigned int max_x{ other.width() + min_x };
+    unsigned int max_y{ other.height() + min_y };
+
+    for (unsigned int y{ min_y }; y < max_y; ++y)
+    {
+        for (unsigned int x{ min_x }; x < max_x; ++x)
+        {
+            unsigned int other_x{ x - min_x };
+            unsigned int other_y{ y - min_y };
+            this->at(x, y) = other.at(other_x, other_y);
+        }
+    }
+}
+
 // Public const functions
 
 // NOTE: section_count could probably be calculated differently.

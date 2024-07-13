@@ -38,6 +38,7 @@ public:
     void scale_to_cover(unsigned int size, unsigned int divisor = 0);
     void scale_to_fit(unsigned int size, unsigned int divisor = 0);
     ColorBGR &at(unsigned int x, unsigned int y);
+    void insert(unsigned int min_x, unsigned int min_y, Image &other);
 
     std::vector<ImageSection> split() const;
     ColorBGR average_color() const;
