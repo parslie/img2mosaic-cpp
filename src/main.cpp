@@ -19,9 +19,9 @@ Arguments debug_generation_args(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    //const Arguments args{ argc, argv };
+    const Arguments args{ argc, argv };
     //const Arguments args{ debug_analysis_args(argc, argv) };
-    const Arguments args{ debug_generation_args(argc, argv) };
+    //const Arguments args{ debug_generation_args(argc, argv) };
 
     if (args.generation_args.parsed)
         return generate(args);
