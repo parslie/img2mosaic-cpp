@@ -58,13 +58,14 @@ int analyze(const Arguments &args)
 {
     constexpr const char *TAB{ "   " };
 
-    std::cout << "[Initializing analysis...]" << '\n';
+    std::cout << "[Preparing analysis...]" << '\n';
     std::shared_ptr<ImageLoader> img_loader{ std::make_shared<ImageLoader>() };
     Palette palette{ args.profile, img_loader };
     std::cout << TAB << "Loaded palette." << '\n';
     const std::vector<fs::path> img_paths{ get_img_paths(args.analysis_args.dir_path, args.analysis_args.recurse) };
     std::cout << TAB << "Loaded image paths." << '\n';
 
+    std::cout << "[Starting analysis...]" << '\n';
     Progress progress{ img_paths.size() };
     for (const fs::path &img_path : img_paths)
     {
